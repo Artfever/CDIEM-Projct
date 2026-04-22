@@ -1,4 +1,8 @@
 package com.project.model;
 
-public class SeverityLevel {
+public enum SeverityLevel {
+    LOW,
+    MEDIUM,
+    HIGH,
+    CRITICAL
 }
