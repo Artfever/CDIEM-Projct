@@ -1,4 +1,10 @@
 package com.project.repository;
 
-public class CaseRepositoryImpl {
+import com.project.model.Case;
+
+public class CaseRepositoryImpl implements CaseRepository {
+    @Override
+    public void save(Case c) {
+        System.out.println("Saving case: " + c.getTitle() + " [" + c.getSeverity() + "]");
+    }
 }

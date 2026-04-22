@@ -1,4 +1,7 @@
 package com.project.repository;
 
-public class CaseRepository {
+import com.project.model.Case;
+
+public interface CaseRepository {
+    void save(Case c);
 }
