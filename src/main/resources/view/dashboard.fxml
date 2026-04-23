@@ -142,7 +142,7 @@
                                                         <Label text="Manage Case Closure" styleClass="module-title" />
                                                         <Label text="Approve or reject closure based on verification and completeness." styleClass="module-text" wrapText="true" />
                                                         <Label text="Use Cases: UC5, UC15" styleClass="module-meta" />
-                                                        <Button mnemonicParsing="false" onAction="#showComingSoon" text="Coming Soon" styleClass="module-button" />
+                                                        <Button mnemonicParsing="false" onAction="#openManageCaseClosure" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />

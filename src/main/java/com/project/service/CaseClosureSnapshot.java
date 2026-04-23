@@ -1,0 +1,15 @@
+package com.project.service;
+
+import com.project.model.Case;
+import com.project.model.CaseClosureDecision;
+import com.project.model.Evidence;
+
+public record CaseClosureSnapshot(Case caseRecord, Evidence evidence, CaseClosureDecision latestDecision) {
+    public boolean hasEvidence() {
+        return evidence != null;
+    }
+
+    public boolean hasLatestDecision() {
+        return latestDecision != null;
+    }
+}

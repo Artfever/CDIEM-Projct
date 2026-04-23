@@ -118,6 +118,17 @@ public final class ChainOfCustodyLog {
         );
     }
 
+    public void recordClosureRejection(Connection connection, Case existingCase, User supervisor, String reason)
+            throws SQLException {
+        auditLogService.recordAudit(
+                connection,
+                existingCase.getCaseId(),
+                "CASE_CLOSURE_REJECTED reason: " + reason + ", state FORENSIC_REVIEW by "
+                        + supervisor.getRole().getDisplayName(),
+                supervisor.getUserId()
+        );
+    }
+
     public void recordSubmission(Connection connection, Case existingCase, User officer) throws SQLException {
         auditLogService.recordAudit(
                 connection,

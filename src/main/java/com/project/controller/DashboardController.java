@@ -105,6 +105,15 @@ public class DashboardController {
     }
 
     @FXML
+    public void openManageCaseClosure() {
+        try {
+            AppNavigator.showManageCaseClosure(requireCurrentUser());
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
     public void openNotifications() {
         try {
             AppNavigator.showNotifications(requireCurrentUser());

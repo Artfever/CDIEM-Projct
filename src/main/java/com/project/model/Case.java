@@ -147,6 +147,14 @@ public class Case {
         }
     }
 
+    public void validateSupervisorReviewState() {
+        validateActiveState();
+
+        if (status != CaseState.SUPERVISOR_REVIEW) {
+            throw new IllegalStateException("This action requires the case to be in SUPERVISOR_REVIEW.");
+        }
+    }
+
     public void validateFreezableState() {
         if (status == CaseState.CLOSED) {
             throw new IllegalStateException("Closed cases cannot be frozen.");
@@ -204,6 +212,14 @@ public class Case {
 
     public void reopenToSupervisorReview() {
         this.status = CaseState.SUPERVISOR_REVIEW;
+    }
+
+    public void closeCase() {
+        this.status = CaseState.CLOSED;
+    }
+
+    public void returnToForensicReview() {
+        this.status = CaseState.FORENSIC_REVIEW;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -81,6 +81,23 @@ public class NotificationService {
         return new CaseReopenNotificationResult(officerNotified, analystNotified);
     }
 
+    public boolean notifyInvestigatingOfficerOfClosureApproval(Connection connection, int caseId, User assignedOfficer,
+                                                               User supervisoryAuthority) throws SQLException {
+        if (assignedOfficer == null) {
+            return false;
+        }
+
+        notificationRepository.save(
+                connection,
+                caseId,
+                assignedOfficer.getUserId(),
+                supervisoryAuthority.getUserId(),
+                "Case " + caseId + " has been approved for closure and marked CLOSED by "
+                        + supervisoryAuthority.getRole().getDisplayName() + " " + supervisoryAuthority.getName() + "."
+        );
+        return true;
+    }
+
     public int notifySupervisorsForReviewSubmission(Connection connection, int caseId, List<User> supervisors,
                                                     User investigatingOfficer) throws SQLException {
         if (supervisors == null || supervisors.isEmpty()) {
