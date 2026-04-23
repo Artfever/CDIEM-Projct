@@ -177,6 +177,20 @@ public class Case {
         }
     }
 
+    public void validateEscalatedReviewState(LocalDateTime referenceTime) {
+        if (status == CaseState.CLOSED) {
+            throw new IllegalStateException("Closed cases cannot be reviewed as escalated cases.");
+        }
+
+        if (priorityState != PriorityState.ESCALATED) {
+            throw new IllegalStateException("This action requires the case priority to be ESCALATED.");
+        }
+
+        if (!hasBreachedSla(referenceTime)) {
+            throw new IllegalStateException("This case has not breached its SLA and cannot enter escalated review.");
+        }
+    }
+
     public Integer getAssignedOfficerId() {
         return assignedOfficerId;
     }
@@ -200,6 +214,19 @@ public class Case {
 
     public void transitionPriorityState(PriorityState priorityState) {
         this.priorityState = priorityState;
+    }
+
+    public LocalDateTime getSlaDueAt() {
+        if (createdAt == null || slaHours == null) {
+            return null;
+        }
+
+        return createdAt.plusHours(slaHours);
+    }
+
+    public boolean hasBreachedSla(LocalDateTime referenceTime) {
+        LocalDateTime dueAt = getSlaDueAt();
+        return dueAt != null && referenceTime != null && referenceTime.isAfter(dueAt);
     }
 
     public void moveToState(CaseState nextState) {

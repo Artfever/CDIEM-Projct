@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.6"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.project.controller.LogViewerController"
+           styleClass="log-root">
+    <children>
+        <BorderPane maxWidth="1220.0" prefWidth="1160.0" styleClass="log-shell">
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="18.0" styleClass="log-header">
+                    <children>
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label text="CDIEM" styleClass="app-tag" />
+                                <Label text="View Chain-of-Custody Log" styleClass="view-title" />
+                                <Label fx:id="subtitleLabel"
+                                       text="Inspect the immutable action timeline for any case without modifying workflow state."
+                                       styleClass="view-subtitle"
+                                       wrapText="true" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER_RIGHT" spacing="5.0">
+                            <children>
+                                <Label fx:id="roleLabel" text="Role" styleClass="header-chip" />
+                                <Label fx:id="identityLabel" text="Identity" styleClass="identity-label" />
+                            </children>
+                        </VBox>
+                        <Button mnemonicParsing="false"
+                                onAction="#goBackToDashboard"
+                                text="Dashboard"
+                                styleClass="action-button secondary-action" />
+                    </children>
+                    <padding>
+                        <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+                    </padding>
+                </HBox>
+            </top>
+            <center>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="log-scroll">
+                    <content>
+                        <VBox spacing="18.0" styleClass="content-pane">
+                            <padding>
+                                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                            </padding>
+                            <children>
+                                <HBox alignment="TOP_LEFT" spacing="18.0">
+                                    <children>
+                                        <VBox HBox.hgrow="ALWAYS" spacing="18.0">
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Read-Only Log Request" styleClass="panel-title" />
+                                                            <Label text="Load a case to retrieve its complete immutable action history from the chain-of-custody log."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="14.0" vgap="14.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="140.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="260.0" />
+                                                            <ColumnConstraints minWidth="150.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="Case ID" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <TextField fx:id="caseIdField"
+                                                                       promptText="Enter case ID"
+                                                                       styleClass="field-input"
+                                                                       GridPane.columnIndex="1"
+                                                                       GridPane.rowIndex="0" />
+                                                            <Button fx:id="loadLogButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#loadLog"
+                                                                    text="Load Log"
+                                                                    styleClass="action-button primary-action"
+                                                                    GridPane.columnIndex="2"
+                                                                    GridPane.rowIndex="0" />
+                                                        </children>
+                                                    </GridPane>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="22.0" left="24.0" right="24.0" top="22.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Immutable Timeline" styleClass="panel-title" />
+                                                            <Label text="All recorded case actions appear below in read-only sequence."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <VBox fx:id="logEntriesContainer" spacing="12.0" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+                                        </VBox>
+
+                                        <VBox prefWidth="360.0" spacing="18.0">
+                                            <VBox spacing="16.0" styleClass="panel panel-side">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Case Snapshot" styleClass="panel-title" />
+                                                            <Label text="Current case context associated with the requested audit history."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="12.0" vgap="12.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="130.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="Case State" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <Label fx:id="caseStatusValueLabel" text="No case loaded" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                            <Label text="Priority" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                            <Label fx:id="priorityValueLabel" text="Unavailable" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                            <Label text="Severity" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                            <Label fx:id="severityValueLabel" text="Unavailable" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                                            <Label text="Assigned Officer" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                                            <Label fx:id="assignedOfficerValueLabel" text="Unavailable" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                                            <Label text="Created At" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                                            <Label fx:id="createdAtValueLabel" text="Unavailable" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                                            <Label text="Log Entries" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                                            <Label fx:id="entryCountValueLabel" text="0" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                                                            <Label text="Mode" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                                                            <Label fx:id="inspectionModeValueLabel" text="Not active" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                                        </children>
+                                                    </GridPane>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="8.0" styleClass="context-card">
+                                                <children>
+                                                    <Label text="Workflow Access" styleClass="context-title" />
+                                                    <Label fx:id="accessSummaryLabel"
+                                                           text="Role-aware workflow summary appears here."
+                                                           styleClass="context-text"
+                                                           wrapText="true" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                                                </padding>
+                                            </VBox>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <Label fx:id="statusLabel" text="Ready." wrapText="true" styleClass="status-banner status-neutral" />
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+    </children>
+</StackPane>

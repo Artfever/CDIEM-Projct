@@ -28,6 +28,11 @@ public class CaseRepositoryImpl implements CaseRepository {
             SET AssignedOfficerID = ?, AssignedOfficerName = ?, Status = ?
             WHERE CaseID = ?
             """;
+    private static final String UPDATE_PRIORITY_STATE_SQL = """
+            UPDATE Cases
+            SET PriorityState = ?
+            WHERE CaseID = ?
+            """;
     private static final String UPDATE_STATE_SQL = """
             UPDATE Cases
             SET Status = ?
@@ -98,6 +103,15 @@ public class CaseRepositoryImpl implements CaseRepository {
             statement.setString(2, officerName);
             statement.setString(3, caseState.name());
             statement.setInt(4, caseId);
+            statement.executeUpdate();
+        }
+    }
+
+    @Override
+    public void updatePriorityState(Connection connection, int caseId, PriorityState priorityState) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_PRIORITY_STATE_SQL)) {
+            statement.setString(1, priorityState.name());
+            statement.setInt(2, caseId);
             statement.executeUpdate();
         }
     }

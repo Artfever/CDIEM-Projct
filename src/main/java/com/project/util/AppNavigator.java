@@ -6,7 +6,9 @@ import com.project.controller.ManageCaseClosureController;
 import com.project.controller.CaseStateTransitionController;
 import com.project.controller.DashboardController;
 import com.project.controller.EvidenceController;
+import com.project.controller.LogViewerController;
 import com.project.controller.NotificationController;
+import com.project.controller.ReviewEscalatedCaseController;
 import com.project.controller.SubmitReviewController;
 import com.project.model.User;
 import javafx.fxml.FXMLLoader;
@@ -86,6 +88,24 @@ public final class AppNavigator {
         ManageCaseClosureController controller = loader.getController();
         controller.setCurrentUser(currentUser);
         showScene(root, "/view/manage_case_closure.css", "CDIEM | Manage Case Closure",
+                1180, 860, 1000, 760);
+    }
+
+    public static void showChainOfCustodyLog(User currentUser) {
+        FXMLLoader loader = newLoader("/view/chain_of_custody_log.fxml");
+        Parent root = load(loader);
+        LogViewerController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        showScene(root, "/view/chain_of_custody_log.css", "CDIEM | View Chain-of-Custody Log",
+                1180, 860, 1000, 760);
+    }
+
+    public static void showEscalatedReview(User currentUser) {
+        FXMLLoader loader = newLoader("/view/review_escalated_case.fxml");
+        Parent root = load(loader);
+        ReviewEscalatedCaseController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        showScene(root, "/view/review_escalated_case.css", "CDIEM | Review Escalated Case",
                 1180, 860, 1000, 760);
     }
 

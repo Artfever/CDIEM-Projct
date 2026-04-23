@@ -1,5 +1,6 @@
 package com.project.service;
 
+import com.project.model.AuditLog;
 import com.project.model.Case;
 import com.project.model.Evidence;
 import com.project.model.PriorityState;
@@ -136,6 +137,21 @@ public final class ChainOfCustodyLog {
                 "CASE_SUBMITTED_FOR_SUPERVISOR_REVIEW by " + officer.getRole().getDisplayName(),
                 officer.getUserId()
         );
+    }
+
+    public void recordEscalatedReview(Connection connection, Case existingCase, User supervisor, String instructions)
+            throws SQLException {
+        auditLogService.recordAudit(
+                connection,
+                existingCase.getCaseId(),
+                "ESCALATED_CASE_REVIEWED instructions: " + instructions + ", priority UNDER_ACTIVE_REVIEW by "
+                        + supervisor.getRole().getDisplayName(),
+                supervisor.getUserId()
+        );
+    }
+
+    public List<AuditLog> retrieveImmutableEntries(Connection connection, int caseId) throws SQLException {
+        return auditLogService.getAuditTrailByCaseId(connection, caseId);
     }
 
     public Optional<Integer> findLatestFreezingAnalystId(Connection connection, int caseId) throws SQLException {

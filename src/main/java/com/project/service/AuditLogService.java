@@ -1,5 +1,6 @@
 package com.project.service;
 
+import com.project.model.AuditLog;
 import com.project.repository.AuditRepository;
 import com.project.repository.AuditRepositoryImpl;
 
@@ -23,6 +24,10 @@ public final class AuditLogService {
 
     public void recordAudit(Connection connection, Integer caseId, String action, int userId) throws SQLException {
         auditRepository.logAction(connection, caseId, action, userId);
+    }
+
+    public List<AuditLog> getAuditTrailByCaseId(Connection connection, int caseId) throws SQLException {
+        return auditRepository.findByCaseId(connection, caseId);
     }
 
     public Optional<Integer> findMostRecentActorByActionPrefixes(Connection connection, int caseId,

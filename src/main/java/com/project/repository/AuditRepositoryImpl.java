@@ -1,9 +1,13 @@
 package com.project.repository;
 
+import com.project.model.AuditLog;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -12,6 +16,14 @@ public class AuditRepositoryImpl implements AuditRepository {
     private static final String INSERT_AUDIT_SQL = """
             INSERT INTO AuditLogs (CaseID, Action, PerformedBy)
             VALUES (?, ?, ?)
+            """;
+    private static final String FIND_BY_CASE_ID_SQL = """
+            SELECT a.LogID, a.CaseID, a.Action, a.PerformedBy, a.[Timestamp], u.Name AS PerformedByName
+            FROM AuditLogs a
+            JOIN Users u
+                ON u.UserID = a.PerformedBy
+            WHERE a.CaseID = ?
+            ORDER BY a.[Timestamp], a.LogID
             """;
 
     @Override
@@ -26,6 +38,29 @@ public class AuditRepositoryImpl implements AuditRepository {
             statement.setString(2, action);
             statement.setInt(3, userId);
             statement.executeUpdate();
+        }
+    }
+
+    @Override
+    public List<AuditLog> findByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_BY_CASE_ID_SQL)) {
+            statement.setInt(1, caseId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<AuditLog> entries = new ArrayList<>();
+                while (resultSet.next()) {
+                    Timestamp timestamp = resultSet.getTimestamp("Timestamp");
+                    entries.add(new AuditLog(
+                            resultSet.getInt("LogID"),
+                            (Integer) resultSet.getObject("CaseID"),
+                            resultSet.getString("Action"),
+                            resultSet.getInt("PerformedBy"),
+                            resultSet.getString("PerformedByName"),
+                            timestamp == null ? null : timestamp.toLocalDateTime()
+                    ));
+                }
+                return entries;
+            }
         }
     }
 

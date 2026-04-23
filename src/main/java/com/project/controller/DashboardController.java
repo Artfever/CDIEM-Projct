@@ -114,6 +114,24 @@ public class DashboardController {
     }
 
     @FXML
+    public void openChainOfCustodyLog() {
+        try {
+            AppNavigator.showChainOfCustodyLog(requireCurrentUser());
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
+    public void openEscalatedReview() {
+        try {
+            AppNavigator.showEscalatedReview(requireCurrentUser());
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
     public void openNotifications() {
         try {
             AppNavigator.showNotifications(requireCurrentUser());
