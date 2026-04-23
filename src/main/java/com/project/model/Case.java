@@ -139,6 +139,28 @@ public class Case {
         }
     }
 
+    public void validateFreezableState() {
+        if (status == CaseState.CLOSED) {
+            throw new IllegalStateException("Closed cases cannot be frozen.");
+        }
+
+        if (status == CaseState.FROZEN) {
+            throw new IllegalStateException("Case is already in FROZEN state.");
+        }
+
+        if (status != CaseState.EVIDENCE_UPLOADED
+                && status != CaseState.FORENSIC_REVIEW
+                && status != CaseState.SUPERVISOR_REVIEW) {
+            throw new IllegalStateException("Only cases in evidence or review workflow can be frozen.");
+        }
+    }
+
+    public void validateFrozenState() {
+        if (status != CaseState.FROZEN) {
+            throw new IllegalStateException("This action requires the case to be in FROZEN state.");
+        }
+    }
+
     public Integer getAssignedOfficerId() {
         return assignedOfficerId;
     }
@@ -170,6 +192,10 @@ public class Case {
 
     public void triggerFreezeWorkflow() {
         this.status = CaseState.FROZEN;
+    }
+
+    public void reopenToSupervisorReview() {
+        this.status = CaseState.SUPERVISOR_REVIEW;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -87,6 +87,15 @@ public class DashboardController {
     }
 
     @FXML
+    public void openManageStateTransitions() {
+        try {
+            AppNavigator.showManageStateTransitions(requireCurrentUser());
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
     public void openNotifications() {
         try {
             AppNavigator.showNotifications(requireCurrentUser());

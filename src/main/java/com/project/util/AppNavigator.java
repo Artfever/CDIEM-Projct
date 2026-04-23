@@ -2,6 +2,7 @@ package com.project.util;
 
 import com.project.CaseManagementApplication;
 import com.project.controller.CaseController;
+import com.project.controller.CaseStateTransitionController;
 import com.project.controller.DashboardController;
 import com.project.controller.EvidenceController;
 import com.project.controller.NotificationController;
@@ -58,6 +59,14 @@ public final class AppNavigator {
         EvidenceController controller = loader.getController();
         controller.setCurrentUser(currentUser);
         showScene(root, "/view/manage_evidence.css", "CDIEM | Manage Evidence", 1200, 820, 1020, 740);
+    }
+
+    public static void showManageStateTransitions(User currentUser) {
+        FXMLLoader loader = newLoader("/view/manage_state_transitions.fxml");
+        Parent root = load(loader);
+        CaseStateTransitionController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        showScene(root, "/view/manage_state_transitions.css", "CDIEM | Case State Transitions", 1180, 820, 1000, 740);
     }
 
     private static Parent loadRoot(String fxmlPath) {

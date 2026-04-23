@@ -48,6 +48,39 @@ public class NotificationService {
         return new NotificationDispatchResult(outgoingOfficerNotified, true);
     }
 
+    public CaseReopenNotificationResult notifyInvestigatingOfficerAndAnalyst(Connection connection, int caseId,
+                                                                             User assignedOfficer, User forensicAnalyst,
+                                                                             User supervisoryAuthority)
+            throws SQLException {
+        boolean officerNotified = false;
+        if (assignedOfficer != null) {
+            notificationRepository.save(
+                    connection,
+                    caseId,
+                    assignedOfficer.getUserId(),
+                    supervisoryAuthority.getUserId(),
+                    "Case " + caseId + " has been reopened and moved to Supervisor Review by "
+                            + supervisoryAuthority.getRole().getDisplayName() + "."
+            );
+            officerNotified = true;
+        }
+
+        boolean analystNotified = false;
+        if (forensicAnalyst != null) {
+            notificationRepository.save(
+                    connection,
+                    caseId,
+                    forensicAnalyst.getUserId(),
+                    supervisoryAuthority.getUserId(),
+                    "Case " + caseId + " has been reopened and returned to Supervisor Review by "
+                            + supervisoryAuthority.getRole().getDisplayName() + "."
+            );
+            analystNotified = true;
+        }
+
+        return new CaseReopenNotificationResult(officerNotified, analystNotified);
+    }
+
     public List<NotificationRecord> getNotificationsForUser(int recipientUserId) {
         try (Connection connection = DBConnection.getConnection()) {
             return notificationRepository.findByRecipientUserId(connection, recipientUserId);

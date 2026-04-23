@@ -118,7 +118,7 @@
                                                         <Label text="Manage Case State Transitions" styleClass="module-title" />
                                                         <Label text="Freeze and reopen cases during forensic and supervisory review." styleClass="module-text" wrapText="true" />
                                                         <Label text="Use Cases: UC4, UC8" styleClass="module-meta" />
-                                                        <Button mnemonicParsing="false" onAction="#showComingSoon" text="Coming Soon" styleClass="module-button" />
+                                                        <Button mnemonicParsing="false" onAction="#openManageStateTransitions" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />

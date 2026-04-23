@@ -8,6 +8,8 @@ import com.project.model.User;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 
 public final class ChainOfCustodyLog {
     private final AuditLogService auditLogService;
@@ -92,6 +94,34 @@ public final class ChainOfCustodyLog {
                 "EVIDENCE_MARKED_TAMPERED file " + evidence.getOriginalFileName()
                         + ", state FROZEN by " + analyst.getRole().getDisplayName(),
                 analyst.getUserId()
+        );
+    }
+
+    public void recordFreeze(Connection connection, Case existingCase, User analyst) throws SQLException {
+        auditLogService.recordAudit(
+                connection,
+                existingCase.getCaseId(),
+                "CASE_FROZEN by " + analyst.getRole().getDisplayName(),
+                analyst.getUserId()
+        );
+    }
+
+    public void recordReopen(Connection connection, Case existingCase, User supervisor, String reason)
+            throws SQLException {
+        auditLogService.recordAudit(
+                connection,
+                existingCase.getCaseId(),
+                "CASE_REOPENED reason: " + reason + ", state SUPERVISOR_REVIEW by "
+                        + supervisor.getRole().getDisplayName(),
+                supervisor.getUserId()
+        );
+    }
+
+    public Optional<Integer> findLatestFreezingAnalystId(Connection connection, int caseId) throws SQLException {
+        return auditLogService.findMostRecentActorByActionPrefixes(
+                connection,
+                caseId,
+                List.of("CASE_FROZEN%", "EVIDENCE_MARKED_TAMPERED%")
         );
     }
 
