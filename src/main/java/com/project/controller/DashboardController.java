@@ -78,6 +78,15 @@ public class DashboardController {
     }
 
     @FXML
+    public void openManageEvidence() {
+        try {
+            AppNavigator.showManageEvidence(requireCurrentUser());
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
     public void openNotifications() {
         try {
             AppNavigator.showNotifications(requireCurrentUser());

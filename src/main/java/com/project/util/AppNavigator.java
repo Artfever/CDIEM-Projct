@@ -3,6 +3,7 @@ package com.project.util;
 import com.project.CaseManagementApplication;
 import com.project.controller.CaseController;
 import com.project.controller.DashboardController;
+import com.project.controller.EvidenceController;
 import com.project.controller.NotificationController;
 import com.project.model.User;
 import javafx.fxml.FXMLLoader;
@@ -49,6 +50,14 @@ public final class AppNavigator {
         NotificationController controller = loader.getController();
         controller.setCurrentUser(currentUser);
         showScene(root, "/view/notifications.css", "CDIEM | Notifications", 1100, 760, 960, 700);
+    }
+
+    public static void showManageEvidence(User currentUser) {
+        FXMLLoader loader = newLoader("/view/manage_evidence.fxml");
+        Parent root = load(loader);
+        EvidenceController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        showScene(root, "/view/manage_evidence.css", "CDIEM | Manage Evidence", 1200, 820, 1020, 740);
     }
 
     private static Parent loadRoot(String fxmlPath) {

@@ -113,6 +113,32 @@ public class Case {
         validateActiveState();
     }
 
+    public void validateEvidenceUploadState() {
+        validateActiveState();
+
+        if (status != CaseState.CASE_CREATED
+                && status != CaseState.EVIDENCE_UPLOADED
+                && status != CaseState.CASE_REASSIGNED) {
+            throw new IllegalStateException("Evidence can only be uploaded while the case is awaiting evidence intake.");
+        }
+    }
+
+    public void validateEvidenceVerificationState() {
+        validateActiveState();
+
+        if (status != CaseState.EVIDENCE_UPLOADED && status != CaseState.FORENSIC_REVIEW) {
+            throw new IllegalStateException("Evidence integrity can only be verified after an upload is recorded.");
+        }
+    }
+
+    public void validateForensicReviewState() {
+        validateActiveState();
+
+        if (status != CaseState.FORENSIC_REVIEW) {
+            throw new IllegalStateException("This action requires the case to be in FORENSIC_REVIEW.");
+        }
+    }
+
     public Integer getAssignedOfficerId() {
         return assignedOfficerId;
     }
@@ -140,6 +166,10 @@ public class Case {
 
     public void moveToState(CaseState nextState) {
         this.status = nextState;
+    }
+
+    public void triggerFreezeWorkflow() {
+        this.status = CaseState.FROZEN;
     }
 
     public LocalDateTime getCreatedAt() {

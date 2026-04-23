@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.6"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.project.controller.EvidenceController"
+           styleClass="evidence-root">
+    <children>
+        <BorderPane maxWidth="1240.0" prefWidth="1180.0" styleClass="evidence-shell">
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="18.0" styleClass="evidence-header">
+                    <children>
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label text="CDIEM" styleClass="app-tag" />
+                                <Label text="Manage Evidence" styleClass="view-title" />
+                                <Label fx:id="subtitleLabel"
+                                       text="Upload, verify, and finalize evidence integrity outcomes."
+                                       styleClass="view-subtitle"
+                                       wrapText="true" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER_RIGHT" spacing="5.0">
+                            <children>
+                                <Label fx:id="roleLabel" text="Role" styleClass="header-chip" />
+                                <Label fx:id="identityLabel" text="Identity" styleClass="identity-label" />
+                            </children>
+                        </VBox>
+                        <Button mnemonicParsing="false"
+                                onAction="#goBackToDashboard"
+                                text="Dashboard"
+                                styleClass="action-button secondary-action" />
+                    </children>
+                    <padding>
+                        <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+                    </padding>
+                </HBox>
+            </top>
+            <center>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="evidence-scroll">
+                    <content>
+                        <VBox spacing="18.0" styleClass="content-pane">
+                            <padding>
+                                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                            </padding>
+                            <children>
+                                <HBox alignment="TOP_LEFT" spacing="18.0">
+                                    <children>
+                                        <VBox HBox.hgrow="ALWAYS" spacing="18.0">
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Action Context" styleClass="panel-title" />
+                                                            <Label text="Enter a case reference to load the latest stored evidence snapshot before performing workflow actions."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="14.0" vgap="14.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="140.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="260.0" />
+                                                            <ColumnConstraints minWidth="150.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="Case ID" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <TextField fx:id="caseIdField"
+                                                                       promptText="Enter case ID"
+                                                                       styleClass="field-input"
+                                                                       GridPane.columnIndex="1"
+                                                                       GridPane.rowIndex="0" />
+                                                            <Button fx:id="loadSnapshotButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#loadEvidenceSnapshot"
+                                                                    text="Load Snapshot"
+                                                                    styleClass="action-button secondary-action"
+                                                                    GridPane.columnIndex="2"
+                                                                    GridPane.rowIndex="0" />
+                                                        </children>
+                                                    </GridPane>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="22.0" left="24.0" right="24.0" top="22.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox fx:id="uploadPanel" spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Upload Evidence" styleClass="panel-title" />
+                                                            <Label text="Store the source file securely, generate its SHA-256 hash, and transition the case into evidence intake."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="14.0" vgap="14.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="140.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="260.0" />
+                                                            <ColumnConstraints minWidth="150.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="Evidence File" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <TextField fx:id="selectedFileField"
+                                                                       promptText="Select a file from your workstation"
+                                                                       styleClass="field-input"
+                                                                       GridPane.columnIndex="1"
+                                                                       GridPane.rowIndex="0" />
+                                                            <Button fx:id="browseFileButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#chooseEvidenceFile"
+                                                                    text="Choose File"
+                                                                    styleClass="action-button secondary-action"
+                                                                    GridPane.columnIndex="2"
+                                                                    GridPane.rowIndex="0" />
+                                                        </children>
+                                                    </GridPane>
+                                                    <Button fx:id="uploadEvidenceButton"
+                                                            mnemonicParsing="false"
+                                                            onAction="#uploadEvidence"
+                                                            text="Upload Evidence"
+                                                            styleClass="action-button primary-action" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox fx:id="analystPanel" spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Integrity Review" styleClass="panel-title" />
+                                                            <Label text="Compare the stored hash against a recalculated SHA-256 value, then finalize the analyst decision for the latest uploaded evidence."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <Label fx:id="verificationOutcomeLabel"
+                                                           text="Awaiting integrity verification."
+                                                           wrapText="true"
+                                                           styleClass="verification-banner verification-neutral" />
+                                                    <HBox spacing="10.0">
+                                                        <children>
+                                                            <Button fx:id="verifyIntegrityButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#verifyIntegrity"
+                                                                    text="Verify Integrity"
+                                                                    styleClass="action-button primary-action" />
+                                                            <Button fx:id="markVerifiedButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#markEvidenceVerified"
+                                                                    text="Mark Verified"
+                                                                    styleClass="action-button secondary-action" />
+                                                            <Button fx:id="markTamperedButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#markEvidenceTampered"
+                                                                    text="Mark Tampered"
+                                                                    styleClass="action-button danger-action" />
+                                                        </children>
+                                                    </HBox>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+                                        </VBox>
+
+                                        <VBox prefWidth="360.0" spacing="18.0">
+                                            <VBox spacing="16.0" styleClass="panel panel-side">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Latest Evidence Snapshot" styleClass="panel-title" />
+                                                            <Label text="The most recent uploaded evidence item for the selected case is shown here."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="12.0" vgap="12.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="130.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="Case State" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <Label fx:id="caseStatusValueLabel" text="No case loaded" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                            <Label text="Evidence Status" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                            <Label fx:id="evidenceStatusValueLabel" text="No evidence loaded" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                            <Label text="Evidence ID" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                            <Label fx:id="evidenceIdValueLabel" text="Pending" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                                            <Label text="File Name" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                                            <Label fx:id="fileNameValueLabel" text="No file selected" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                                            <Label text="Stored Path" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                                            <Label fx:id="storedPathValueLabel" text="No storage record available" wrapText="true" styleClass="snapshot-value mono-value" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                                            <Label text="Uploaded At" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                                            <Label fx:id="uploadedAtValueLabel" text="Not available" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                                                            <Label text="Stored SHA-256" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                                                            <Label fx:id="storedHashValueLabel" text="Not available" wrapText="true" styleClass="snapshot-value mono-value" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+                                                            <Label text="Recalculated SHA-256" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                                                            <Label fx:id="recalculatedHashValueLabel" text="Not yet recalculated" wrapText="true" styleClass="snapshot-value mono-value" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                                        </children>
+                                                    </GridPane>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="8.0" styleClass="context-card">
+                                                <children>
+                                                    <Label text="Workflow Access" styleClass="context-title" />
+                                                    <Label fx:id="accessSummaryLabel"
+                                                           text="Role-aware workflow guidance appears here."
+                                                           styleClass="context-text"
+                                                           wrapText="true" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                                                </padding>
+                                            </VBox>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <Label fx:id="statusLabel" text="Ready." wrapText="true" styleClass="status-banner status-neutral" />
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+    </children>
+</StackPane>

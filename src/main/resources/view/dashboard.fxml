@@ -82,7 +82,7 @@
                                                         <Label text="Manage Evidence" styleClass="module-title" />
                                                         <Label text="Upload evidence files and update integrity outcomes." styleClass="module-text" wrapText="true" />
                                                         <Label text="Use Cases: UC2, UC7, UC9" styleClass="module-meta" />
-                                                        <Button mnemonicParsing="false" onAction="#showComingSoon" text="Coming Soon" styleClass="module-button" />
+                                                        <Button mnemonicParsing="false" onAction="#openManageEvidence" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
