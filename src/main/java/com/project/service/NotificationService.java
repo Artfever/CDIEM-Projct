@@ -81,6 +81,29 @@ public class NotificationService {
         return new CaseReopenNotificationResult(officerNotified, analystNotified);
     }
 
+    public int notifySupervisorsForReviewSubmission(Connection connection, int caseId, List<User> supervisors,
+                                                    User investigatingOfficer) throws SQLException {
+        if (supervisors == null || supervisors.isEmpty()) {
+            return 0;
+        }
+
+        int notifiedCount = 0;
+        for (User supervisor : supervisors) {
+            notificationRepository.save(
+                    connection,
+                    caseId,
+                    supervisor.getUserId(),
+                    investigatingOfficer.getUserId(),
+                    "Case " + caseId + " has been submitted for Supervisor Review by "
+                            + investigatingOfficer.getRole().getDisplayName() + " "
+                            + investigatingOfficer.getName() + "."
+            );
+            notifiedCount++;
+        }
+
+        return notifiedCount;
+    }
+
     public List<NotificationRecord> getNotificationsForUser(int recipientUserId) {
         try (Connection connection = DBConnection.getConnection()) {
             return notificationRepository.findByRecipientUserId(connection, recipientUserId);

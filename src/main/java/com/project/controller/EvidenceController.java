@@ -251,7 +251,7 @@ public class EvidenceController {
                 : "Verify uploaded evidence, compare hashes, and finalize the forensic integrity outcome.");
         accessSummaryLabel.setText(officerSignedIn
                 ? "You can upload evidence for cases currently assigned to you. Each upload is stored locally, hashed with SHA-256, logged to chain-of-custody, and moves the case to EVIDENCE_UPLOADED."
-                : "You can load the latest uploaded evidence for a case, compare stored and recalculated hashes, then mark the result as VERIFIED or TAMPERED. Verified evidence moves to SUPERVISOR_REVIEW, while tampered evidence freezes the case.");
+                : "You can load the latest uploaded evidence for a case, compare stored and recalculated hashes, then mark the result as VERIFIED or TAMPERED. Verified evidence remains in FORENSIC_REVIEW until the assigned Investigating Officer submits the case for Supervisor Review, while tampered evidence freezes the case.");
 
         setNodeVisibility(uploadPanel, officerSignedIn);
         setNodeVisibility(analystPanel, analystSignedIn);
@@ -298,6 +298,16 @@ public class EvidenceController {
         storedHashValueLabel.setText(defaultText(evidence.getOriginalSha256(), "Not available"));
         recalculatedHashValueLabel.setText(defaultText(evidence.getRecalculatedSha256(), "Not yet recalculated"));
 
+        if (evidence.getStatus() == EvidenceStatus.VERIFIED) {
+            updateVerificationOutcome("Evidence marked as verified. Awaiting Investigating Officer submission.", VERIFICATION_MATCH);
+            return;
+        }
+
+        if (evidence.getStatus() == EvidenceStatus.TAMPERED) {
+            updateVerificationOutcome("Evidence marked as tampered and the case is now frozen.", VERIFICATION_MISMATCH);
+            return;
+        }
+
         if (!evidence.hasVerificationSnapshot()) {
             updateVerificationOutcome("Awaiting integrity verification.", VERIFICATION_NEUTRAL);
             return;
@@ -337,6 +347,7 @@ public class EvidenceController {
         boolean inForensicReview = evidenceLoaded && currentSnapshot.caseRecord().getStatus() == CaseState.FORENSIC_REVIEW;
         boolean verificationReady = evidenceLoaded && currentSnapshot.evidence().hasVerificationSnapshot();
         boolean hashesMatch = verificationReady && currentSnapshot.evidence().hashesMatch();
+        boolean decisionPending = evidenceLoaded && currentSnapshot.evidence().getStatus() == EvidenceStatus.UPLOADED;
 
         if (browseFileButton != null) {
             browseFileButton.setDisable(!officerSignedIn);
@@ -351,10 +362,10 @@ public class EvidenceController {
             verifyIntegrityButton.setDisable(!analystSignedIn || !evidenceLoaded);
         }
         if (markVerifiedButton != null) {
-            markVerifiedButton.setDisable(!analystSignedIn || !inForensicReview || !verificationReady || !hashesMatch);
+            markVerifiedButton.setDisable(!analystSignedIn || !inForensicReview || !verificationReady || !hashesMatch || !decisionPending);
         }
         if (markTamperedButton != null) {
-            markTamperedButton.setDisable(!analystSignedIn || !inForensicReview || !verificationReady || hashesMatch);
+            markTamperedButton.setDisable(!analystSignedIn || !inForensicReview || !verificationReady || hashesMatch || !decisionPending);
         }
     }
 
@@ -408,6 +419,11 @@ public class EvidenceController {
     }
 
     private String buildDecisionStatus(String decisionLabel, EvidenceDecisionResult result) {
+        if ("verified".equalsIgnoreCase(decisionLabel)) {
+            return "Evidence marked as verified. Case state remains " + formatCaseState(result.caseState())
+                    + " until the assigned Investigating Officer submits it for Supervisor Review.";
+        }
+
         return "Evidence marked as " + decisionLabel
                 + ". Evidence status is now " + result.evidenceStatus().getDisplayName()
                 + " and case state is " + formatCaseState(result.caseState()) + ".";

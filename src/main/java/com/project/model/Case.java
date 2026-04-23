@@ -139,6 +139,14 @@ public class Case {
         }
     }
 
+    public void validateVerifiedState() {
+        validateActiveState();
+
+        if (status != CaseState.FORENSIC_REVIEW) {
+            throw new IllegalStateException("Only cases in FORENSIC_REVIEW with verified evidence can be submitted for supervisor review.");
+        }
+    }
+
     public void validateFreezableState() {
         if (status == CaseState.CLOSED) {
             throw new IllegalStateException("Closed cases cannot be frozen.");

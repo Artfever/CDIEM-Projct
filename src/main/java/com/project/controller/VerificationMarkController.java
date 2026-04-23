@@ -1,7 +1,6 @@
 package com.project.controller;
 
 import com.project.model.Case;
-import com.project.model.CaseState;
 import com.project.model.Evidence;
 import com.project.model.EvidenceStatus;
 import com.project.model.User;
@@ -60,8 +59,6 @@ public class VerificationMarkController extends AbstractCaseWorkflowController {
                         decisionTime
                 );
 
-                existingCase.moveToState(CaseState.SUPERVISOR_REVIEW);
-                caseRepository.updateState(connection, caseId, existingCase.getStatus());
                 chainOfCustodyLog.recordVerifiedDecision(connection, existingCase, evidence, currentUser);
 
                 connection.commit();
@@ -84,6 +81,14 @@ public class VerificationMarkController extends AbstractCaseWorkflowController {
     private void validateVerificationReady(Evidence evidence) {
         if (!evidence.hasVerificationSnapshot()) {
             throw new IllegalStateException("Run integrity verification before marking evidence as verified.");
+        }
+
+        if (evidence.getStatus() == EvidenceStatus.VERIFIED) {
+            throw new IllegalStateException("Evidence is already marked as verified and is awaiting officer submission.");
+        }
+
+        if (evidence.getStatus() == EvidenceStatus.TAMPERED) {
+            throw new IllegalStateException("Tampered evidence cannot be marked as verified.");
         }
 
         if (!evidence.hashesMatch()) {

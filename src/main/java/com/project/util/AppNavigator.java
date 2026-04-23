@@ -6,6 +6,7 @@ import com.project.controller.CaseStateTransitionController;
 import com.project.controller.DashboardController;
 import com.project.controller.EvidenceController;
 import com.project.controller.NotificationController;
+import com.project.controller.SubmitReviewController;
 import com.project.model.User;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -67,6 +68,15 @@ public final class AppNavigator {
         CaseStateTransitionController controller = loader.getController();
         controller.setCurrentUser(currentUser);
         showScene(root, "/view/manage_state_transitions.css", "CDIEM | Case State Transitions", 1180, 820, 1000, 740);
+    }
+
+    public static void showSubmitReview(User currentUser) {
+        FXMLLoader loader = newLoader("/view/submit_review.fxml");
+        Parent root = load(loader);
+        SubmitReviewController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        showScene(root, "/view/manage_state_transitions.css", "CDIEM | Submit Case for Supervisor Review",
+                1180, 820, 1000, 740);
     }
 
     private static Parent loadRoot(String fxmlPath) {

@@ -81,7 +81,8 @@ public final class ChainOfCustodyLog {
                 connection,
                 existingCase.getCaseId(),
                 "EVIDENCE_MARKED_VERIFIED file " + evidence.getOriginalFileName()
-                        + ", state SUPERVISOR_REVIEW by " + analyst.getRole().getDisplayName(),
+                        + ", case remains FORENSIC_REVIEW awaiting officer submission by "
+                        + analyst.getRole().getDisplayName(),
                 analyst.getUserId()
         );
     }
@@ -114,6 +115,15 @@ public final class ChainOfCustodyLog {
                 "CASE_REOPENED reason: " + reason + ", state SUPERVISOR_REVIEW by "
                         + supervisor.getRole().getDisplayName(),
                 supervisor.getUserId()
+        );
+    }
+
+    public void recordSubmission(Connection connection, Case existingCase, User officer) throws SQLException {
+        auditLogService.recordAudit(
+                connection,
+                existingCase.getCaseId(),
+                "CASE_SUBMITTED_FOR_SUPERVISOR_REVIEW by " + officer.getRole().getDisplayName(),
+                officer.getUserId()
         );
     }
 
