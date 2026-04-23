@@ -13,18 +13,24 @@ import java.util.Optional;
 
 public class UserRepositoryImpl implements UserRepository {
     private static final String FIND_BY_ID_SQL = """
-            SELECT UserID, Name, Role
+            SELECT UserID, Name, Username, Email, Role
             FROM Users
             WHERE UserID = ?
             """;
+    private static final String AUTHENTICATE_SQL = """
+            SELECT UserID, Name, Username, Email, Role
+            FROM Users
+            WHERE (LOWER(Username) = LOWER(?) OR LOWER(Email) = LOWER(?))
+              AND PasswordHash = ?
+            """;
     private static final String FIND_BY_ROLE_SQL = """
-            SELECT UserID, Name, Role
+            SELECT UserID, Name, Username, Email, Role
             FROM Users
             WHERE Role = ?
             ORDER BY Name, UserID
             """;
     private static final String FIND_CASE_ACTORS_SQL = """
-            SELECT UserID, Name, Role
+            SELECT UserID, Name, Username, Email, Role
             FROM Users
             WHERE Role IN ('OFFICER', 'SUPERVISOR')
             ORDER BY
@@ -43,11 +49,24 @@ public class UserRepositoryImpl implements UserRepository {
                     return Optional.empty();
                 }
 
-                return Optional.of(new User(
-                        resultSet.getInt("UserID"),
-                        resultSet.getString("Name"),
-                        UserRole.valueOf(resultSet.getString("Role"))
-                ));
+                return Optional.of(mapUser(resultSet));
+            }
+        }
+    }
+
+    @Override
+    public Optional<User> authenticate(Connection connection, String identifier, String passwordHash) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(AUTHENTICATE_SQL)) {
+            statement.setString(1, identifier);
+            statement.setString(2, identifier);
+            statement.setString(3, passwordHash);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return Optional.empty();
+                }
+
+                return Optional.of(mapUser(resultSet));
             }
         }
     }
@@ -73,12 +92,18 @@ public class UserRepositoryImpl implements UserRepository {
     private List<User> mapUsers(ResultSet resultSet) throws SQLException {
         List<User> users = new ArrayList<>();
         while (resultSet.next()) {
-            users.add(new User(
-                    resultSet.getInt("UserID"),
-                    resultSet.getString("Name"),
-                    UserRole.valueOf(resultSet.getString("Role"))
-            ));
+            users.add(mapUser(resultSet));
         }
         return users;
+    }
+
+    private User mapUser(ResultSet resultSet) throws SQLException {
+        return new User(
+                resultSet.getInt("UserID"),
+                resultSet.getString("Name"),
+                resultSet.getString("Username"),
+                resultSet.getString("Email"),
+                UserRole.valueOf(resultSet.getString("Role"))
+        );
     }
 }

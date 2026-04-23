@@ -2,6 +2,7 @@ package com.project.service;
 
 import com.project.model.Case;
 import com.project.model.CaseState;
+import com.project.model.PriorityState;
 import com.project.model.SeverityLevel;
 import com.project.model.User;
 import com.project.model.UserRole;
@@ -22,6 +23,10 @@ public class CaseService {
     private static final int MAX_TITLE_LENGTH = 255;
     private static final int MAX_DESCRIPTION_LENGTH = 1000;
     private static final int MAX_RELATED_INFO_LENGTH = 1000;
+    private static final int LOW_SLA_HOURS = 120;
+    private static final int MEDIUM_SLA_HOURS = 72;
+    private static final int HIGH_SLA_HOURS = 24;
+    private static final int CRITICAL_SLA_HOURS = 8;
 
     private final CaseRepository caseRepository;
     private final AuditRepository auditRepository;
@@ -46,11 +51,15 @@ public class CaseService {
             try {
                 User currentUser = requireUserForCreate(connection, userId);
                 c.setCreatedByUserId(currentUser.getUserId());
+                c.setSlaHours(determineSlaHours(c.getSeverity()));
+                c.setPriorityState(determinePriorityState(c.getSeverity()));
                 c.setStatus(CaseState.CASE_CREATED);
                 c.setAssignedOfficerId(null);
                 int caseId = caseRepository.save(connection, c);
                 auditRepository.logAction(connection, caseId,
-                        "CASE_REGISTERED with initial state CASE_CREATED by " + currentUser.getRole().getDisplayName(),
+                        "CASE_REGISTERED with initial state CASE_CREATED, severity " + c.getSeverity().name()
+                                + ", SLA " + c.getSlaHours() + "h, priority " + c.getPriorityState().name()
+                                + " by " + currentUser.getRole().getDisplayName(),
                         currentUser.getUserId());
 
                 connection.commit();
@@ -64,7 +73,7 @@ public class CaseService {
         }
     }
 
-    public void updateSeverityLevel(int caseId, SeverityLevel severity, int userId) {
+    public CaseSeverityUpdateResult updateSeverityLevel(int caseId, SeverityLevel severity, int userId) {
         if (severity == null) {
             throw new IllegalArgumentException("Severity is required.");
         }
@@ -81,13 +90,19 @@ public class CaseService {
                     throw new IllegalArgumentException("Case is already marked with severity " + severity.name() + ".");
                 }
 
-                caseRepository.updateSeverity(connection, caseId, severity);
+                int recalculatedSlaHours = determineSlaHours(severity);
+                PriorityState recalculatedPriorityState = determinePriorityState(severity);
+
+                caseRepository.updateSeverityProfile(connection, caseId, severity, recalculatedSlaHours, recalculatedPriorityState);
                 auditRepository.logAction(connection, caseId,
                         "CASE_SEVERITY_CHANGED from " + existingCase.getSeverity().name() + " to " + severity.name()
-                                + " by " + currentUser.getRole().getDisplayName(),
+                                + ", SLA " + existingCase.getSlaHours() + "h -> " + recalculatedSlaHours + "h"
+                                + ", priority " + existingCase.getPriorityState().name() + " -> "
+                                + recalculatedPriorityState.name() + " by " + currentUser.getRole().getDisplayName(),
                         currentUser.getUserId());
 
                 connection.commit();
+                return new CaseSeverityUpdateResult(severity, recalculatedSlaHours, recalculatedPriorityState);
             } catch (Exception e) {
                 rollbackQuietly(connection);
                 throw wrapException("Failed to update case severity.", e);
@@ -97,7 +112,7 @@ public class CaseService {
         }
     }
 
-    public void reassignOfficer(int caseId, Integer officerId, int userId) {
+    public CaseReassignmentResult reassignOfficer(int caseId, Integer officerId, int userId) {
         if (officerId == null) {
             throw new IllegalArgumentException("Assigned Investigating Officer ID is required.");
         }
@@ -109,7 +124,10 @@ public class CaseService {
                 User currentUser = requireUserForReassignment(connection, userId);
                 Case existingCase = requireCase(connection, caseId);
                 ensureCaseAllowsModuleOneChanges(existingCase);
-                validateAssignedOfficer(connection, officerId);
+                User newOfficer = validateAssignedOfficer(connection, officerId);
+                User previousOfficer = existingCase.getAssignedOfficerId() == null
+                        ? null
+                        : requireUser(connection, existingCase.getAssignedOfficerId());
 
                 if (officerId.equals(existingCase.getAssignedOfficerId())) {
                     throw new IllegalArgumentException("This case is already assigned to Investigating Officer " + officerId + ".");
@@ -119,11 +137,18 @@ public class CaseService {
                 caseRepository.updateAssignedOfficer(connection, caseId, officerId, CaseState.CASE_REASSIGNED);
                 auditRepository.logAction(connection, caseId,
                         "CASE_REASSIGNED from Investigating Officer "
-                                + (previousOfficerId == null ? "UNASSIGNED" : previousOfficerId)
-                                + " to " + officerId + " by " + currentUser.getRole().getDisplayName(),
+                                + buildOfficerIdentity(previousOfficer)
+                                + " to " + buildOfficerIdentity(newOfficer)
+                                + " by " + currentUser.getRole().getDisplayName(),
                         currentUser.getUserId());
 
                 connection.commit();
+                return new CaseReassignmentResult(
+                        previousOfficer == null ? "Unassigned" : previousOfficer.getName(),
+                        newOfficer.getName(),
+                        previousOfficerId != null,
+                        true
+                );
             } catch (Exception e) {
                 rollbackQuietly(connection);
                 throw wrapException("Failed to reassign investigating officer.", e);
@@ -204,9 +229,9 @@ public class CaseService {
         }
     }
 
-    private void validateAssignedOfficer(Connection connection, Integer officerId) throws SQLException {
+    private User validateAssignedOfficer(Connection connection, Integer officerId) throws SQLException {
         if (officerId == null) {
-            return;
+            return null;
         }
 
         User officer = userRepository.findById(connection, officerId)
@@ -215,6 +240,8 @@ public class CaseService {
         if (officer.getRole() != UserRole.OFFICER) {
             throw new IllegalStateException("Assigned user must be an Investigating Officer.");
         }
+
+        return officer;
     }
 
     private Case requireCase(Connection connection, int caseId) throws SQLException {
@@ -230,6 +257,31 @@ public class CaseService {
         if (existingCase.getStatus() == CaseState.FROZEN) {
             throw new IllegalStateException("Frozen cases cannot be changed from the Manage Case module.");
         }
+    }
+
+    private int determineSlaHours(SeverityLevel severity) {
+        return switch (severity) {
+            case LOW -> LOW_SLA_HOURS;
+            case MEDIUM -> MEDIUM_SLA_HOURS;
+            case HIGH -> HIGH_SLA_HOURS;
+            case CRITICAL -> CRITICAL_SLA_HOURS;
+        };
+    }
+
+    private PriorityState determinePriorityState(SeverityLevel severity) {
+        return switch (severity) {
+            case LOW, MEDIUM -> PriorityState.STANDARD;
+            case HIGH -> PriorityState.PRIORITY;
+            case CRITICAL -> PriorityState.ESCALATED;
+        };
+    }
+
+    private String buildOfficerIdentity(User officer) {
+        if (officer == null) {
+            return "UNASSIGNED";
+        }
+
+        return officer.getName() + " (ID " + officer.getUserId() + ")";
     }
 
     private void rollbackQuietly(Connection connection) {

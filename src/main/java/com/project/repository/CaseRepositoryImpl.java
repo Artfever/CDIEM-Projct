@@ -2,6 +2,7 @@ package com.project.repository;
 
 import com.project.model.Case;
 import com.project.model.CaseState;
+import com.project.model.PriorityState;
 import com.project.model.SeverityLevel;
 
 import java.sql.Connection;
@@ -14,12 +15,12 @@ import java.util.Optional;
 
 public class CaseRepositoryImpl implements CaseRepository {
     private static final String INSERT_SQL = """
-            INSERT INTO Cases (Title, Description, RelatedInfo, Severity, Status, CreatedBy, AssignedOfficerID)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Cases (Title, Description, RelatedInfo, Severity, SlaHours, PriorityState, Status, CreatedBy, AssignedOfficerID)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
     private static final String UPDATE_SEVERITY_SQL = """
             UPDATE Cases
-            SET Severity = ?
+            SET Severity = ?, SlaHours = ?, PriorityState = ?
             WHERE CaseID = ?
             """;
     private static final String UPDATE_ASSIGNED_OFFICER_SQL = """
@@ -28,7 +29,8 @@ public class CaseRepositoryImpl implements CaseRepository {
             WHERE CaseID = ?
             """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT CaseID, Title, Description, RelatedInfo, Severity, Status, CreatedBy, AssignedOfficerID, CreatedAt
+            SELECT CaseID, Title, Description, RelatedInfo, Severity, SlaHours, PriorityState, Status,
+                   CreatedBy, AssignedOfficerID, CreatedAt
             FROM Cases
             WHERE CaseID = ?
             """;
@@ -40,13 +42,15 @@ public class CaseRepositoryImpl implements CaseRepository {
             statement.setString(2, c.getDescription());
             statement.setString(3, c.getRelatedInfo());
             statement.setString(4, c.getSeverity().name());
-            statement.setString(5, c.getStatus().name());
-            statement.setInt(6, c.getCreatedByUserId());
+            statement.setInt(5, c.getSlaHours());
+            statement.setString(6, c.getPriorityState().name());
+            statement.setString(7, c.getStatus().name());
+            statement.setInt(8, c.getCreatedByUserId());
 
             if (c.getAssignedOfficerId() == null) {
-                statement.setNull(7, java.sql.Types.INTEGER);
+                statement.setNull(9, java.sql.Types.INTEGER);
             } else {
-                statement.setInt(7, c.getAssignedOfficerId());
+                statement.setInt(9, c.getAssignedOfficerId());
             }
 
             statement.executeUpdate();
@@ -64,10 +68,13 @@ public class CaseRepositoryImpl implements CaseRepository {
     }
 
     @Override
-    public void updateSeverity(Connection connection, int caseId, SeverityLevel severity) throws SQLException {
+    public void updateSeverityProfile(Connection connection, int caseId, SeverityLevel severity, int slaHours,
+                                      PriorityState priorityState) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_SEVERITY_SQL)) {
             statement.setString(1, severity.name());
-            statement.setInt(2, caseId);
+            statement.setInt(2, slaHours);
+            statement.setString(3, priorityState.name());
+            statement.setInt(4, caseId);
             statement.executeUpdate();
         }
     }
@@ -107,6 +114,8 @@ public class CaseRepositoryImpl implements CaseRepository {
                         resultSet.getString("Description"),
                         resultSet.getString("RelatedInfo"),
                         SeverityLevel.valueOf(resultSet.getString("Severity")),
+                        resultSet.getInt("SlaHours"),
+                        PriorityState.valueOf(resultSet.getString("PriorityState")),
                         CaseState.valueOf(resultSet.getString("Status")),
                         createdByUserId,
                         assignedOfficerId,

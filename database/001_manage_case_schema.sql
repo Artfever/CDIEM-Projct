@@ -21,6 +21,9 @@ BEGIN
         RelatedInfo NVARCHAR(1000) NULL,
         Severity NVARCHAR(20) NOT NULL
             CHECK (Severity IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')),
+        SlaHours INT NOT NULL,
+        PriorityState NVARCHAR(30) NOT NULL
+            CHECK (PriorityState IN ('STANDARD', 'PRIORITY', 'ESCALATED', 'UNDER_ACTIVE_REVIEW')),
         Status NVARCHAR(30) NOT NULL DEFAULT 'CASE_CREATED'
             CHECK (Status IN ('CASE_CREATED', 'EVIDENCE_UPLOADED', 'FORENSIC_REVIEW', 'SUPERVISOR_REVIEW', 'FROZEN', 'CASE_REASSIGNED', 'CLOSED')),
         CreatedBy INT NOT NULL,

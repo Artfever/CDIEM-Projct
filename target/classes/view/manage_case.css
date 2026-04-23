@@ -193,6 +193,10 @@
     -fx-background-color: rgba(255, 255, 255, 0.10);
 }
 
+.header-action-button {
+    -fx-padding: 10px 18px 10px 18px;
+}
+
 .status-banner {
     -fx-background-radius: 18px;
     -fx-padding: 13px 15px 13px 15px;

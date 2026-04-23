@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface UserRepository {
     Optional<User> findById(Connection connection, int userId) throws SQLException;
 
+    Optional<User> authenticate(Connection connection, String identifier, String passwordHash) throws SQLException;
+
     List<User> findByRole(Connection connection, UserRole role) throws SQLException;
 
     List<User> findCaseActors(Connection connection) throws SQLException;

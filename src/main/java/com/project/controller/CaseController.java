@@ -3,8 +3,13 @@ package com.project.controller;
 import com.project.model.Case;
 import com.project.model.SeverityLevel;
 import com.project.model.User;
+import com.project.model.UserRole;
+import com.project.service.CaseReassignmentResult;
 import com.project.service.CaseService;
+import com.project.service.CaseSeverityUpdateResult;
+import com.project.util.AppNavigator;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -39,7 +44,17 @@ public class CaseController {
     @FXML
     private Label statusLabel;
 
+    @FXML
+    private Button registerCaseButton;
+
+    @FXML
+    private Button updateSeverityButton;
+
+    @FXML
+    private Button reassignOfficerButton;
+
     private final CaseService caseService = new CaseService();
+    private User currentUser;
 
     @FXML
     public void initialize() {
@@ -48,6 +63,12 @@ public class CaseController {
         }
         setStatus("Case operations ready.", STATUS_NEUTRAL);
         loadUsers();
+        applyCurrentUserContext();
+    }
+
+    public void setCurrentUser(User currentUser) {
+        this.currentUser = currentUser;
+        applyCurrentUserContext();
     }
 
     @FXML
@@ -72,12 +93,12 @@ public class CaseController {
     @FXML
     public void updateSeverity() {
         try {
-            caseService.updateSeverityLevel(
+            CaseSeverityUpdateResult result = caseService.updateSeverityLevel(
                     parseRequiredInteger(caseIdField.getText(), "Case ID"),
                     parseSeverity(),
                     requireSelectedUser(currentUserBox, "Acting User").getUserId()
             );
-            setStatus("Case severity updated successfully.", STATUS_SUCCESS);
+            setStatus(buildSeverityStatus(result), STATUS_SUCCESS);
         } catch (Exception e) {
             setStatus(getRootMessage(e), STATUS_ERROR);
         }
@@ -86,12 +107,26 @@ public class CaseController {
     @FXML
     public void reassignOfficer() {
         try {
-            caseService.reassignOfficer(
+            CaseReassignmentResult result = caseService.reassignOfficer(
                     parseRequiredInteger(caseIdField.getText(), "Case ID"),
                     requireSelectedUser(assignedOfficerBox, "Assigned Investigating Officer").getUserId(),
                     requireSelectedUser(currentUserBox, "Acting User").getUserId()
             );
-            setStatus("Investigating Officer reassigned successfully.", STATUS_SUCCESS);
+            setStatus(buildReassignmentStatus(result), STATUS_SUCCESS);
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
+    public void goBackToDashboard() {
+        if (currentUser == null) {
+            setStatus("No authenticated session was found for dashboard navigation.", STATUS_ERROR);
+            return;
+        }
+
+        try {
+            AppNavigator.showDashboard(currentUser);
         } catch (Exception e) {
             setStatus(getRootMessage(e), STATUS_ERROR);
         }
@@ -116,9 +151,71 @@ public class CaseController {
         try {
             currentUserBox.getItems().setAll(caseService.getCaseActors());
             assignedOfficerBox.getItems().setAll(caseService.getInvestigatingOfficers());
+            applyCurrentUserSelection();
         } catch (Exception e) {
             setStatus(getRootMessage(e), STATUS_ERROR);
         }
+    }
+
+    private void applyCurrentUserContext() {
+        if (currentUser == null || currentUserBox == null) {
+            return;
+        }
+
+        applyCurrentUserSelection();
+        currentUserBox.setDisable(true);
+
+        boolean officerSignedIn = currentUser.getRole() == UserRole.OFFICER;
+        boolean supervisorSignedIn = currentUser.getRole() == UserRole.SUPERVISOR;
+
+        setNodeVisibility(registerCaseButton, officerSignedIn);
+        setNodeVisibility(updateSeverityButton, supervisorSignedIn);
+        setNodeVisibility(reassignOfficerButton, supervisorSignedIn);
+
+        if (officerSignedIn) {
+            setStatus("Signed in as Investigating Officer. Registration actions are available.", STATUS_NEUTRAL);
+        } else if (supervisorSignedIn) {
+            setStatus("Signed in as Supervisory Authority. Severity updates and reassignment are available.", STATUS_NEUTRAL);
+        }
+    }
+
+    private void applyCurrentUserSelection() {
+        if (currentUser == null || currentUserBox == null || currentUserBox.getItems().isEmpty()) {
+            return;
+        }
+
+        for (User user : currentUserBox.getItems()) {
+            if (user.getUserId() == currentUser.getUserId()) {
+                currentUserBox.getSelectionModel().select(user);
+                break;
+            }
+        }
+    }
+
+    private void setNodeVisibility(Button button, boolean visible) {
+        if (button == null) {
+            return;
+        }
+
+        button.setVisible(visible);
+        button.setManaged(visible);
+    }
+
+    private String buildSeverityStatus(CaseSeverityUpdateResult result) {
+        return "Case severity updated to " + result.severity().name() + ". SLA threshold recalculated to "
+                + result.slaHours() + " hours and priority state set to "
+                + result.priorityState().getDisplayName() + ".";
+    }
+
+    private String buildReassignmentStatus(CaseReassignmentResult result) {
+        if (!result.outgoingOfficerNotified()) {
+            return "Investigating Officer assigned to " + result.newOfficerName()
+                    + ". Incoming officer notified and case state moved to CASE_REASSIGNED.";
+        }
+
+        return "Investigating Officer reassigned from " + result.previousOfficerName() + " to "
+                + result.newOfficerName()
+                + ". Outgoing and incoming officers notified, and case state moved to CASE_REASSIGNED.";
     }
 
     private User requireSelectedUser(ComboBox<User> comboBox, String fieldName) {

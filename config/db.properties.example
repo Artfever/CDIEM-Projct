@@ -1,0 +1,3 @@
+db.url=jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=CDIEM;encrypt=true;trustServerCertificate=true
+db.user=YOUR_SQL_USER
+db.password=YOUR_SQL_PASSWORD

@@ -2,6 +2,7 @@ package com.project.repository;
 
 import com.project.model.Case;
 import com.project.model.CaseState;
+import com.project.model.PriorityState;
 import com.project.model.SeverityLevel;
 
 import java.sql.Connection;
@@ -11,7 +12,8 @@ import java.util.Optional;
 public interface CaseRepository {
     int save(Connection connection, Case c) throws SQLException;
 
-    void updateSeverity(Connection connection, int caseId, SeverityLevel severity) throws SQLException;
+    void updateSeverityProfile(Connection connection, int caseId, SeverityLevel severity, int slaHours,
+                               PriorityState priorityState) throws SQLException;
 
     void updateAssignedOfficer(Connection connection, int caseId, Integer officerId, CaseState caseState) throws SQLException;
 

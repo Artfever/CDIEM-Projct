@@ -1,0 +1,117 @@
+.root {
+    -fx-font-family: "Segoe UI";
+}
+
+.login-root {
+    -fx-background-color:
+        radial-gradient(center 20% 18%, radius 50%, rgba(225, 124, 61, 0.18), transparent 46%),
+        radial-gradient(center 90% 12%, radius 46%, rgba(49, 118, 139, 0.18), transparent 42%),
+        linear-gradient(to bottom right, #071015 0%, #0f1d24 48%, #17252b 100%);
+    -fx-padding: 28px;
+}
+
+.login-shell {
+    -fx-background-color: rgba(9, 15, 20, 0.94);
+    -fx-background-radius: 28px;
+    -fx-border-color: rgba(255, 255, 255, 0.06);
+    -fx-border-radius: 28px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.34), 26, 0.12, 0, 16);
+}
+
+.login-tag {
+    -fx-background-color: rgba(234, 146, 89, 0.18);
+    -fx-background-radius: 999px;
+    -fx-padding: 6px 12px 6px 12px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffcfaa;
+}
+
+.login-title {
+    -fx-font-family: "Cambria";
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f7fbfd;
+}
+
+.login-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: rgba(194, 208, 216, 0.84);
+}
+
+.input-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #d7a86e;
+}
+
+.input-field {
+    -fx-background-color: #0d141a;
+    -fx-background-radius: 16px;
+    -fx-border-color: #253440;
+    -fx-border-radius: 16px;
+    -fx-text-fill: #edf5f8;
+    -fx-prompt-text-fill: #748791;
+    -fx-padding: 14px 16px 14px 16px;
+    -fx-font-size: 13px;
+}
+
+.input-field:focused {
+    -fx-background-color: #121c23;
+    -fx-border-color: #d38d56;
+    -fx-effect: dropshadow(gaussian, rgba(211, 141, 86, 0.18), 10, 0.10, 0, 0);
+}
+
+.login-button {
+    -fx-background-color: linear-gradient(to right, #d48d52 0%, #b96a3c 100%);
+    -fx-background-radius: 999px;
+    -fx-text-fill: #f6fbfd;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 13px 20px 13px 20px;
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: linear-gradient(to right, #df9d67 0%, #c1764a 100%);
+}
+
+.credential-card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(18, 27, 33, 0.94), rgba(16, 24, 29, 0.98));
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 18px;
+}
+
+.credential-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f2f7f9;
+}
+
+.credential-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #98acb5;
+}
+
+.status-banner {
+    -fx-background-radius: 18px;
+    -fx-padding: 13px 15px 13px 15px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-neutral {
+    -fx-background-color: rgba(130, 150, 162, 0.14);
+    -fx-text-fill: #c0cdd3;
+}
+
+.status-success {
+    -fx-background-color: rgba(84, 162, 124, 0.18);
+    -fx-text-fill: #daf3e5;
+}
+
+.status-error {
+    -fx-background-color: rgba(192, 90, 79, 0.18);
+    -fx-text-fill: #ffd8d2;
+}

@@ -1,0 +1,8 @@
+target/
+
+.idea/
+*.iml
+
+config/db.properties
+.env
+*.log

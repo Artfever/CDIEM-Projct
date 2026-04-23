@@ -94,6 +94,33 @@ SET CreatedBy = COALESCE(CreatedBy, @OfficerForCreatedBy)
 WHERE CreatedBy IS NULL;
 GO
 
+DECLARE @StatusCheckBeforeUpdate sysname;
+SELECT TOP (1) @StatusCheckBeforeUpdate = cc.name
+FROM sys.check_constraints cc
+WHERE cc.parent_object_id = OBJECT_ID('dbo.Cases')
+  AND cc.definition LIKE '%Status%';
+
+IF @StatusCheckBeforeUpdate IS NOT NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.Cases DROP CONSTRAINT [' + @StatusCheckBeforeUpdate + ']');
+END
+GO
+
+DECLARE @StatusDefaultBeforeUpdate sysname;
+SELECT TOP (1) @StatusDefaultBeforeUpdate = dc.name
+FROM sys.default_constraints dc
+JOIN sys.columns c
+    ON c.object_id = dc.parent_object_id
+   AND c.column_id = dc.parent_column_id
+WHERE dc.parent_object_id = OBJECT_ID('dbo.Cases')
+  AND c.name = 'Status';
+
+IF @StatusDefaultBeforeUpdate IS NOT NULL
+BEGIN
+    EXEC('ALTER TABLE dbo.Cases DROP CONSTRAINT [' + @StatusDefaultBeforeUpdate + ']');
+END
+GO
+
 UPDATE dbo.Cases
 SET Status = CASE
     WHEN Status = 'OPEN' THEN 'CASE_CREATED'
