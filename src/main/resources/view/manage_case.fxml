@@ -68,10 +68,10 @@
                                                 <Label text="Severity" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                                                 <ComboBox fx:id="severityBox" promptText="Select severity" prefWidth="280.0" styleClass="field-input combo-input" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                                                <Label text="Description" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                <Label fx:id="descriptionLabel" text="Description" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                                                 <TextArea fx:id="descriptionArea" promptText="Enter case description" prefRowCount="4" wrapText="true" styleClass="field-input text-block" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                                                <Label text="Related Information" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                                <Label fx:id="relatedInfoLabel" text="Related Information" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                                                 <TextArea fx:id="relatedInfoArea" promptText="Optional contextual information" prefRowCount="3" wrapText="true" styleClass="field-input text-block" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                             </children>
                                         </GridPane>
@@ -100,7 +100,7 @@
                                                 <Label text="Case ID" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                                                 <TextField fx:id="caseIdField" promptText="Required for update actions" styleClass="field-input" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2" />
 
-                                                <Label text="Investigating Officer" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                                <Label fx:id="assignedOfficerLabel" text="Investigating Officer" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="4" />
                                                 <ComboBox fx:id="assignedOfficerBox" promptText="Select new investigating officer" styleClass="field-input combo-input user-picker" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2" />
                                             </children>
                                         </GridPane>

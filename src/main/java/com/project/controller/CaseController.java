@@ -9,6 +9,7 @@ import com.project.service.CaseService;
 import com.project.service.CaseSeverityUpdateResult;
 import com.project.util.AppNavigator;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -36,10 +37,19 @@ public class CaseController {
     private TextArea descriptionArea;
 
     @FXML
+    private Label descriptionLabel;
+
+    @FXML
     private TextArea relatedInfoArea;
 
     @FXML
+    private Label relatedInfoLabel;
+
+    @FXML
     private ComboBox<User> assignedOfficerBox;
+
+    @FXML
+    private Label assignedOfficerLabel;
 
     @FXML
     private Label statusLabel;
@@ -54,6 +64,9 @@ public class CaseController {
     private Button reassignOfficerButton;
 
     private final CaseService caseService = new CaseService();
+    private final CaseRegistrationController caseRegistrationController = new CaseRegistrationController();
+    private final SeverityUpdateController severityUpdateController = new SeverityUpdateController();
+    private final ReassignmentController reassignmentController = new ReassignmentController();
     private User currentUser;
 
     @FXML
@@ -81,7 +94,10 @@ public class CaseController {
                     clean(relatedInfoArea.getText())
             );
 
-            int caseId = caseService.registerCase(c, requireSelectedUser(currentUserBox, "Acting User").getUserId());
+            int caseId = caseRegistrationController.submitCaseDetails(
+                    c,
+                    requireSelectedUser(currentUserBox, "Acting User").getUserId()
+            );
             caseIdField.setText(String.valueOf(caseId));
             clearRegistrationFields();
             setStatus("Case created successfully. Case ID: " + caseId, STATUS_SUCCESS);
@@ -93,7 +109,7 @@ public class CaseController {
     @FXML
     public void updateSeverity() {
         try {
-            CaseSeverityUpdateResult result = caseService.updateSeverityLevel(
+            CaseSeverityUpdateResult result = severityUpdateController.updateSeverity(
                     parseRequiredInteger(caseIdField.getText(), "Case ID"),
                     parseSeverity(),
                     requireSelectedUser(currentUserBox, "Acting User").getUserId()
@@ -107,7 +123,7 @@ public class CaseController {
     @FXML
     public void reassignOfficer() {
         try {
-            CaseReassignmentResult result = caseService.reassignOfficer(
+            CaseReassignmentResult result = reassignmentController.reassignTo(
                     parseRequiredInteger(caseIdField.getText(), "Case ID"),
                     requireSelectedUser(assignedOfficerBox, "Assigned Investigating Officer").getUserId(),
                     requireSelectedUser(currentUserBox, "Acting User").getUserId()
@@ -167,10 +183,26 @@ public class CaseController {
 
         boolean officerSignedIn = currentUser.getRole() == UserRole.OFFICER;
         boolean supervisorSignedIn = currentUser.getRole() == UserRole.SUPERVISOR;
+        boolean showNarrativeFields = !supervisorSignedIn;
 
         setNodeVisibility(registerCaseButton, officerSignedIn);
         setNodeVisibility(updateSeverityButton, supervisorSignedIn);
         setNodeVisibility(reassignOfficerButton, supervisorSignedIn);
+        setNodeVisibility(descriptionLabel, showNarrativeFields);
+        setNodeVisibility(descriptionArea, showNarrativeFields);
+        setNodeVisibility(relatedInfoLabel, showNarrativeFields);
+        setNodeVisibility(relatedInfoArea, showNarrativeFields);
+        setNodeVisibility(assignedOfficerLabel, supervisorSignedIn);
+        setNodeVisibility(assignedOfficerBox, supervisorSignedIn);
+
+        if (!showNarrativeFields) {
+            descriptionArea.clear();
+            relatedInfoArea.clear();
+        }
+
+        if (!supervisorSignedIn) {
+            assignedOfficerBox.getSelectionModel().clearSelection();
+        }
 
         if (officerSignedIn) {
             setStatus("Signed in as Investigating Officer. Registration actions are available.", STATUS_NEUTRAL);
@@ -192,13 +224,13 @@ public class CaseController {
         }
     }
 
-    private void setNodeVisibility(Button button, boolean visible) {
-        if (button == null) {
+    private void setNodeVisibility(Node node, boolean visible) {
+        if (node == null) {
             return;
         }
 
-        button.setVisible(visible);
-        button.setManaged(visible);
+        node.setVisible(visible);
+        node.setManaged(visible);
     }
 
     private String buildSeverityStatus(CaseSeverityUpdateResult result) {
@@ -208,6 +240,11 @@ public class CaseController {
     }
 
     private String buildReassignmentStatus(CaseReassignmentResult result) {
+        if (!result.incomingOfficerNotified()) {
+            return "Investigating Officer updated to " + result.newOfficerName()
+                    + ", but the notification dispatch did not complete.";
+        }
+
         if (!result.outgoingOfficerNotified()) {
             return "Investigating Officer assigned to " + result.newOfficerName()
                     + ". Incoming officer notified and case state moved to CASE_REASSIGNED.";

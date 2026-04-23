@@ -33,6 +33,9 @@ public class DashboardController {
     private VBox manageEvidenceCard;
 
     @FXML
+    private VBox notificationsCard;
+
+    @FXML
     private VBox verifyIntegrityCard;
 
     @FXML
@@ -75,6 +78,15 @@ public class DashboardController {
     }
 
     @FXML
+    public void openNotifications() {
+        try {
+            AppNavigator.showNotifications(requireCurrentUser());
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
     public void showComingSoon() {
         setStatus("This module shell is visible for your role, but the workflow is not implemented yet.", STATUS_NEUTRAL);
     }
@@ -96,6 +108,7 @@ public class DashboardController {
 
         configureCard(manageCaseCard, hasAccess(currentUser.getRole(), "manageCase"));
         configureCard(manageEvidenceCard, hasAccess(currentUser.getRole(), "manageEvidence"));
+        configureCard(notificationsCard, hasAccess(currentUser.getRole(), "notifications"));
         configureCard(verifyIntegrityCard, hasAccess(currentUser.getRole(), "verifyIntegrity"));
         configureCard(stateTransitionsCard, hasAccess(currentUser.getRole(), "stateTransitions"));
         configureCard(submitReviewCard, hasAccess(currentUser.getRole(), "submitReview"));
@@ -113,15 +126,16 @@ public class DashboardController {
 
     private String buildAccessibleModulesText(UserRole role) {
         return switch (role) {
-            case OFFICER -> "Accessible modules: Manage Case, Manage Evidence, Submit Case for Supervisor Review.";
-            case ANALYST -> "Accessible modules: Manage Evidence, Verify Evidence Integrity, Manage Case State Transitions.";
-            case SUPERVISOR -> "Accessible modules: Manage Case, Manage Case State Transitions, Manage Case Closure, View Chain-of-Custody Log, Generate Summary Report, Review Escalated Case.";
+            case OFFICER -> "Accessible modules: Manage Case, Notifications, Manage Evidence, Submit Case for Supervisor Review.";
+            case ANALYST -> "Accessible modules: Notifications, Manage Evidence, Verify Evidence Integrity, Manage Case State Transitions.";
+            case SUPERVISOR -> "Accessible modules: Manage Case, Notifications, Manage Case State Transitions, Manage Case Closure, View Chain-of-Custody Log, Generate Summary Report, Review Escalated Case.";
         };
     }
 
     private boolean hasAccess(UserRole role, String moduleKey) {
         return switch (moduleKey) {
             case "manageCase" -> role == UserRole.OFFICER || role == UserRole.SUPERVISOR;
+            case "notifications" -> true;
             case "manageEvidence" -> role == UserRole.OFFICER || role == UserRole.ANALYST;
             case "verifyIntegrity" -> role == UserRole.ANALYST;
             case "stateTransitions" -> role == UserRole.ANALYST || role == UserRole.SUPERVISOR;

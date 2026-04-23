@@ -11,8 +11,8 @@ public class Case {
     private Integer slaHours;
     private PriorityState priorityState;
     private CaseState status;
-    private Integer createdByUserId;
     private Integer assignedOfficerId;
+    private String assignedOfficerName;
     private LocalDateTime createdAt;
 
     public Case(String title, String description, SeverityLevel severity, String relatedInfo) {
@@ -21,7 +21,7 @@ public class Case {
 
     public Case(Integer caseId, String title, String description, String relatedInfo, SeverityLevel severity,
                 Integer slaHours, PriorityState priorityState, CaseState status,
-                Integer createdByUserId, Integer assignedOfficerId, LocalDateTime createdAt) {
+                Integer assignedOfficerId, String assignedOfficerName, LocalDateTime createdAt) {
         this.caseId = caseId;
         this.title = title;
         this.description = description;
@@ -30,8 +30,8 @@ public class Case {
         this.slaHours = slaHours;
         this.priorityState = priorityState;
         this.status = status;
-        this.createdByUserId = createdByUserId;
         this.assignedOfficerId = assignedOfficerId;
+        this.assignedOfficerName = assignedOfficerName;
         this.createdAt = createdAt;
     }
 
@@ -99,12 +99,18 @@ public class Case {
         this.status = status;
     }
 
-    public Integer getCreatedByUserId() {
-        return createdByUserId;
+    public void validateActiveState() {
+        if (status == CaseState.CLOSED) {
+            throw new IllegalStateException("Closed cases cannot be modified.");
+        }
+
+        if (status == CaseState.FROZEN) {
+            throw new IllegalStateException("Frozen cases cannot be changed from the Manage Case module.");
+        }
     }
 
-    public void setCreatedByUserId(Integer createdByUserId) {
-        this.createdByUserId = createdByUserId;
+    public void validateReassignableState() {
+        validateActiveState();
     }
 
     public Integer getAssignedOfficerId() {
@@ -113,6 +119,27 @@ public class Case {
 
     public void setAssignedOfficerId(Integer assignedOfficerId) {
         this.assignedOfficerId = assignedOfficerId;
+    }
+
+    public String getAssignedOfficerName() {
+        return assignedOfficerName;
+    }
+
+    public void setAssignedOfficerName(String assignedOfficerName) {
+        this.assignedOfficerName = assignedOfficerName;
+    }
+
+    public void updateAssignedOfficer(Integer officerId, String officerName) {
+        this.assignedOfficerId = officerId;
+        this.assignedOfficerName = officerName;
+    }
+
+    public void transitionPriorityState(PriorityState priorityState) {
+        this.priorityState = priorityState;
+    }
+
+    public void moveToState(CaseState nextState) {
+        this.status = nextState;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -15,7 +15,8 @@ public interface CaseRepository {
     void updateSeverityProfile(Connection connection, int caseId, SeverityLevel severity, int slaHours,
                                PriorityState priorityState) throws SQLException;
 
-    void updateAssignedOfficer(Connection connection, int caseId, Integer officerId, CaseState caseState) throws SQLException;
+    void updateAssignedOfficer(Connection connection, int caseId, Integer officerId, String officerName,
+                               CaseState caseState) throws SQLException;
 
     Optional<Case> findById(Connection connection, int caseId) throws SQLException;
 }

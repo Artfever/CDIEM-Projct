@@ -26,11 +26,9 @@ BEGIN
             CHECK (PriorityState IN ('STANDARD', 'PRIORITY', 'ESCALATED', 'UNDER_ACTIVE_REVIEW')),
         Status NVARCHAR(30) NOT NULL DEFAULT 'CASE_CREATED'
             CHECK (Status IN ('CASE_CREATED', 'EVIDENCE_UPLOADED', 'FORENSIC_REVIEW', 'SUPERVISOR_REVIEW', 'FROZEN', 'CASE_REASSIGNED', 'CLOSED')),
-        CreatedBy INT NOT NULL,
-        AssignedOfficerID INT NULL,
+        AssignedOfficerID INT NOT NULL,
+        AssignedOfficerName NVARCHAR(100) NOT NULL,
         CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        CONSTRAINT FK_Cases_CreatedBy
-            FOREIGN KEY (CreatedBy) REFERENCES dbo.Users(UserID),
         CONSTRAINT FK_Cases_AssignedOfficer
             FOREIGN KEY (AssignedOfficerID) REFERENCES dbo.Users(UserID)
     );
@@ -49,6 +47,26 @@ BEGIN
             FOREIGN KEY (CaseID) REFERENCES dbo.Cases(CaseID),
         CONSTRAINT FK_AuditLogs_User
             FOREIGN KEY (PerformedBy) REFERENCES dbo.Users(UserID)
+    );
+END
+GO
+
+IF OBJECT_ID('dbo.Notifications', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Notifications (
+        NotificationID INT IDENTITY(1,1) PRIMARY KEY,
+        CaseID INT NULL,
+        RecipientUserID INT NOT NULL,
+        SentByUserID INT NOT NULL,
+        Message NVARCHAR(255) NOT NULL,
+        Channel NVARCHAR(20) NOT NULL DEFAULT 'SYSTEM',
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        CONSTRAINT FK_Notifications_Case
+            FOREIGN KEY (CaseID) REFERENCES dbo.Cases(CaseID),
+        CONSTRAINT FK_Notifications_RecipientUser
+            FOREIGN KEY (RecipientUserID) REFERENCES dbo.Users(UserID),
+        CONSTRAINT FK_Notifications_SentByUser
+            FOREIGN KEY (SentByUserID) REFERENCES dbo.Users(UserID)
     );
 END
 GO

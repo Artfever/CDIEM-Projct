@@ -38,11 +38,12 @@ WHERE Username = 'sarah' AND Role = 'SUPERVISOR';
 IF @LegacyOfficerId IS NOT NULL AND @OfficerReplacementId IS NOT NULL AND @LegacyOfficerId <> @OfficerReplacementId
 BEGIN
     UPDATE dbo.Cases
-    SET CreatedBy = @OfficerReplacementId
-    WHERE CreatedBy = @LegacyOfficerId;
-
-    UPDATE dbo.Cases
-    SET AssignedOfficerID = @OfficerReplacementId
+    SET AssignedOfficerID = @OfficerReplacementId,
+        AssignedOfficerName = (
+            SELECT Name
+            FROM dbo.Users
+            WHERE UserID = @OfficerReplacementId
+        )
     WHERE AssignedOfficerID = @LegacyOfficerId;
 
     UPDATE dbo.AuditLogs
@@ -80,7 +81,7 @@ END
 
 IF @LegacyOfficerId IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM dbo.Cases WHERE CreatedBy = @LegacyOfficerId OR AssignedOfficerID = @LegacyOfficerId)
+    IF EXISTS (SELECT 1 FROM dbo.Cases WHERE AssignedOfficerID = @LegacyOfficerId)
         SET @LegacyOfficerReferenced = 1;
 
     IF EXISTS (SELECT 1 FROM dbo.AuditLogs WHERE PerformedBy = @LegacyOfficerId)

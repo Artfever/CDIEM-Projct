@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class CaseRepositoryImpl implements CaseRepository {
     private static final String INSERT_SQL = """
-            INSERT INTO Cases (Title, Description, RelatedInfo, Severity, SlaHours, PriorityState, Status, CreatedBy, AssignedOfficerID)
+            INSERT INTO Cases (Title, Description, RelatedInfo, Severity, SlaHours, PriorityState, Status, AssignedOfficerID, AssignedOfficerName)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
     private static final String UPDATE_SEVERITY_SQL = """
@@ -25,12 +25,12 @@ public class CaseRepositoryImpl implements CaseRepository {
             """;
     private static final String UPDATE_ASSIGNED_OFFICER_SQL = """
             UPDATE Cases
-            SET AssignedOfficerID = ?, Status = ?
+            SET AssignedOfficerID = ?, AssignedOfficerName = ?, Status = ?
             WHERE CaseID = ?
             """;
     private static final String FIND_BY_ID_SQL = """
             SELECT CaseID, Title, Description, RelatedInfo, Severity, SlaHours, PriorityState, Status,
-                   CreatedBy, AssignedOfficerID, CreatedAt
+                   AssignedOfficerID, AssignedOfficerName, CreatedAt
             FROM Cases
             WHERE CaseID = ?
             """;
@@ -45,13 +45,14 @@ public class CaseRepositoryImpl implements CaseRepository {
             statement.setInt(5, c.getSlaHours());
             statement.setString(6, c.getPriorityState().name());
             statement.setString(7, c.getStatus().name());
-            statement.setInt(8, c.getCreatedByUserId());
 
             if (c.getAssignedOfficerId() == null) {
-                statement.setNull(9, java.sql.Types.INTEGER);
+                statement.setNull(8, java.sql.Types.INTEGER);
             } else {
-                statement.setInt(9, c.getAssignedOfficerId());
+                statement.setInt(8, c.getAssignedOfficerId());
             }
+
+            statement.setString(9, c.getAssignedOfficerName());
 
             statement.executeUpdate();
 
@@ -80,7 +81,8 @@ public class CaseRepositoryImpl implements CaseRepository {
     }
 
     @Override
-    public void updateAssignedOfficer(Connection connection, int caseId, Integer officerId, CaseState caseState) throws SQLException {
+    public void updateAssignedOfficer(Connection connection, int caseId, Integer officerId, String officerName,
+                                      CaseState caseState) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_ASSIGNED_OFFICER_SQL)) {
             if (officerId == null) {
                 statement.setNull(1, java.sql.Types.INTEGER);
@@ -88,8 +90,9 @@ public class CaseRepositoryImpl implements CaseRepository {
                 statement.setInt(1, officerId);
             }
 
-            statement.setString(2, caseState.name());
-            statement.setInt(3, caseId);
+            statement.setString(2, officerName);
+            statement.setString(3, caseState.name());
+            statement.setInt(4, caseId);
             statement.executeUpdate();
         }
     }
@@ -105,8 +108,8 @@ public class CaseRepositoryImpl implements CaseRepository {
                 }
 
                 Timestamp createdAt = resultSet.getTimestamp("CreatedAt");
-                Integer createdByUserId = (Integer) resultSet.getObject("CreatedBy");
                 Integer assignedOfficerId = (Integer) resultSet.getObject("AssignedOfficerID");
+                String assignedOfficerName = resultSet.getString("AssignedOfficerName");
 
                 Case caseRecord = new Case(
                         resultSet.getInt("CaseID"),
@@ -117,8 +120,8 @@ public class CaseRepositoryImpl implements CaseRepository {
                         resultSet.getInt("SlaHours"),
                         PriorityState.valueOf(resultSet.getString("PriorityState")),
                         CaseState.valueOf(resultSet.getString("Status")),
-                        createdByUserId,
                         assignedOfficerId,
+                        assignedOfficerName,
                         createdAt == null ? null : createdAt.toLocalDateTime()
                 );
                 return Optional.of(caseRecord);
