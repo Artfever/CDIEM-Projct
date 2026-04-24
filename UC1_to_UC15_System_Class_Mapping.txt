@@ -1,0 +1,837 @@
+CDEIMS USE CASE 1 TO 15 SYSTEM CLASS MAPPING
+Source document: B_G07_i2431651_i2430632_i2430713.pdf
+Codebase reviewed: src/main/java/com/project
+Prepared: 2026-04-24
+
+======================================================================
+1. HOW TO READ THIS FILE
+======================================================================
+- "Primary classes" are the classes that directly execute the use case.
+- "Supporting classes" are repositories, models, result objects, enums,
+  and utilities that make the use case work.
+- "Shared classes" are used before or across many use cases, especially
+  for login, navigation, database access, and actor lookup.
+- Where the PDF behavior and the current code differ, the difference is
+  stated explicitly in a "Document vs current code" note.
+
+======================================================================
+2. GLOBAL SHARED CLASSES USED ACROSS MANY USE CASES
+======================================================================
+- CaseManagementApplication
+  Boots the JavaFX application and hands control to AppNavigator.
+
+- AppNavigator
+  Loads the scenes and moves the user between login, dashboard, and the
+  workflow modules.
+
+- LoginController + AuthService
+  Implement the authentication precondition that appears in many use
+  cases before a user can access a module.
+
+- DashboardController
+  Serves as the role-based entry point to the modules that implement
+  UC1 to UC15.
+
+- DBConnection
+  Opens the SQL Server connections used by controllers, services, and
+  repositories throughout the workflow.
+
+- UserRepository + UserRepositoryImpl
+  Load users by ID, authenticate users, and provide actor lookup for
+  role checks and notifications.
+
+- User + UserRole
+  Represent the actors named in the PDF and enforce role-based access
+  checks across the workflow.
+
+- Case
+  Central domain model for the overall investigation workflow. It holds
+  case state, severity, priority, ownership, and SLA data, and provides
+  validation/transition methods used throughout the system.
+
+- CaseState
+  Shared state enum used across the full case lifecycle from creation to
+  closure, reopening, freezing, review, and escalation handling.
+
+======================================================================
+3. DETAILED MAPPING: USE CASE BY USE CASE
+======================================================================
+
+----------------------------------------------------------------------
+UC1 - CASE REGISTRATION
+Actor: Investigating Officer
+----------------------------------------------------------------------
+Primary classes
+- DashboardController
+  Gives the officer access to the case-management module.
+- CaseController
+  Main UI controller for the case-management area that hosts the
+  registration workflow.
+- CaseRegistrationController
+  Direct implementation of registration. It validates the officer role,
+  validates inputs, creates the case, computes the first SLA/priority,
+  stores the case, and records the registration action.
+- CaseService
+  Service facade for the case module and supports registration-related
+  loading and coordination.
+
+Supporting classes
+- AbstractCaseWorkflowController
+  Shared validation, case lookup, user lookup, and transaction helpers
+  used by the case workflow controllers.
+- CaseRepository + CaseRepositoryImpl
+  Persist the new case record and read it back when needed.
+- Case
+  Holds the title, description, severity, related information, assigned
+  officer, state, priority, and SLA values.
+- SeverityLevel + PriorityState + CaseState
+  Represent the initial severity, priority, and "Case Created" state.
+- SLAManager
+  Calculates the initial SLA threshold and priority from severity.
+- IdGenerator
+  Produces the display Case ID shown to the officer.
+- AuditLogService + AuditRepository + AuditRepositoryImpl + AuditLog
+  Record the immutable registration entry required by the PDF.
+
+How the implementation works
+1. The officer authenticates through LoginController/AuthService.
+2. DashboardController opens the case module.
+3. CaseRegistrationController validates the form using the shared helper
+   methods from AbstractCaseWorkflowController.
+4. SLAManager computes SLA due time and priority.
+5. CaseRepositoryImpl stores the Case.
+6. IdGenerator provides the generated display identifier.
+7. AuditLogService records the registration action.
+8. The UI returns confirmation to the officer.
+
+----------------------------------------------------------------------
+UC2 - UPLOAD DIGITAL EVIDENCE
+Actor: Investigating Officer
+----------------------------------------------------------------------
+Primary classes
+- DashboardController
+  Gives access to the evidence-management area.
+- EvidenceController
+  Main UI controller for evidence upload and evidence review actions.
+- EvidenceUploadController
+  Direct implementation of the upload flow. It validates role and case
+  state, stores the file, generates the SHA-256 hash, saves evidence
+  metadata, records the upload event, and moves the case forward.
+- EvidenceService
+  Service facade for upload, integrity verification, and evidence status
+  decisions.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Load the target case and persist the state change to "Evidence
+  Uploaded".
+- EvidenceRepository + EvidenceRepositoryImpl
+  Persist the uploaded evidence metadata and stored hash.
+- Evidence
+  Represents the uploaded file, stored hash, verification data, and
+  evidence status.
+- SecureFileStorage
+  Stores the evidence file in the configured secure location.
+- HashService
+  Generates the SHA-256 hash for the uploaded file.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the upload action as an immutable chain-of-custody entry.
+- EvidenceUploadResult + EvidenceSnapshot
+  Return upload outcome data back to the UI.
+- EvidenceStatus + CaseState
+  Represent the evidence lifecycle and the case transition to
+  "Evidence Uploaded".
+
+How the implementation works
+1. The officer opens the evidence module for a valid case.
+2. EvidenceUploadController checks the officer role and case readiness.
+3. SecureFileStorage stores the file.
+4. HashService computes the SHA-256 hash.
+5. EvidenceRepositoryImpl stores the Evidence record.
+6. ChainOfCustodyLog records the upload with actor, file details, and
+   hash information.
+7. CaseRepositoryImpl updates the case state to "Evidence Uploaded".
+
+----------------------------------------------------------------------
+UC3 - VERIFY EVIDENCE INTEGRITY
+Actor: Digital Forensic Analyst
+----------------------------------------------------------------------
+Primary classes
+- EvidenceController
+  Exposes the analyst-side verification actions.
+- IntegrityVerificationController
+  Direct implementation of integrity verification. It retrieves the
+  stored evidence, recalculates the file hash, compares it to the
+  original hash, stores the verification snapshot, records the action,
+  and moves the case into forensic review handling.
+- EvidenceService
+  Service facade that groups verification and evidence decisions.
+
+Supporting classes
+- EvidenceRepository + EvidenceRepositoryImpl
+  Load the evidence and persist the recalculated hash snapshot.
+- CaseRepository + CaseRepositoryImpl
+  Load the case and update state where the workflow requires it.
+- Evidence
+  Stores the original hash, recalculated hash, verifier data, and the
+  verification snapshot flags.
+- Case
+  Enforces case-state rules for integrity verification.
+- HashService
+  Recalculates the SHA-256 hash from the stored evidence file.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the verification event.
+- IntegrityVerificationResult + EvidenceSnapshot
+  Carry comparison results back to the UI.
+- EvidenceStatus + CaseState
+  Represent the state/status values touched during verification.
+
+How the implementation works
+1. The analyst opens a case with uploaded evidence.
+2. IntegrityVerificationController loads the stored evidence record.
+3. HashService recalculates the SHA-256 hash from the stored file.
+4. The controller compares original and recalculated hash values.
+5. EvidenceRepositoryImpl stores the verification snapshot.
+6. ChainOfCustodyLog records the verification action.
+
+Document vs current code
+- The PDF describes UC3 as the step that both verifies integrity and
+  directly marks the evidence as "Verified" or "Tampered".
+- The current code splits that behavior into two stages:
+  1. UC3 performs the comparison and stores the verification snapshot.
+  2. UC7 or UC9 then finalizes the evidence status.
+
+----------------------------------------------------------------------
+UC4 - FREEZE CASE DUE TO TAMPERED EVIDENCE
+Actor: Digital Forensic Analyst
+----------------------------------------------------------------------
+Primary classes
+- CaseStateTransitionController
+  Main UI controller for freeze and reopen actions.
+- CaseFreezeController
+  Direct implementation of the manual freeze action after tampered
+  evidence is identified.
+- CaseStateTransitionService
+  Service facade for freezing and reopening cases.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Load the case and persist the transition to "Frozen".
+- Case
+  Validates whether the case can be frozen and performs the transition.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the freeze action with actor and timestamp.
+- CaseFreezeResult
+  Returns the freeze outcome to the UI.
+
+How the implementation works
+1. The analyst reviews the case after tamper detection.
+2. CaseFreezeController validates the analyst role and case state.
+3. Case.triggerFreezeWorkflow() is used to move the case to "Frozen".
+4. CaseRepositoryImpl persists the frozen state.
+5. ChainOfCustodyLog records the freeze action.
+
+Document vs current code
+- The current implementation supports both:
+  1. A dedicated manual freeze action through CaseFreezeController.
+  2. An automatic freeze path triggered by UC7 through
+     TamperMarkController.
+
+----------------------------------------------------------------------
+UC5 - APPROVE CASE CLOSURE
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- ManageCaseClosureController
+  Main UI controller for closure approval and rejection actions.
+- CaseClosureController
+  Direct implementation of closure approval. It validates the
+  supervisor role, confirms that the case is closure-ready, closes the
+  case, records the approval, and sends the closure notification.
+- CaseClosureService
+  Service facade for closure approval and rejection workflows.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Load the case and persist the transition to "Closed".
+- EvidenceRepository + EvidenceRepositoryImpl
+  Confirm that the latest evidence is in an acceptable verified state.
+- CaseClosureDecisionRepository + CaseClosureDecisionRepositoryImpl
+  Persist the supervisor's approval record.
+- CaseClosureDecision + CaseClosureDecisionType
+  Represent the stored closure decision.
+- CaseClosureSnapshot + CaseClosureApprovalResult
+  Return decision and case details to the UI.
+- Case
+  Enforces closure-state rules and executes the close transition.
+- AuditLogService + AuditRepository + AuditLog
+  Record the approval action in audit logs.
+- NotificationService + NotificationRepository + NotificationRecord
+  Notify the investigating officer that the case was approved for
+  closure.
+
+How the implementation works
+1. The supervisor opens the closure module for a case in the proper
+   review state.
+2. CaseClosureController validates the role and evidence readiness.
+3. Case.closeCase() moves the domain object to "Closed".
+4. CaseRepositoryImpl stores the new state.
+5. CaseClosureDecisionRepositoryImpl stores the approval record.
+6. AuditLogService records the action.
+7. NotificationService informs the investigating officer.
+
+----------------------------------------------------------------------
+UC6 - UPDATE CASE SEVERITY LEVEL
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- CaseController
+  Hosts the case-management UI where severity updates are made.
+- SeverityUpdateController
+  Direct implementation of severity change. It validates the supervisor
+  role, changes severity, recalculates SLA and priority, records the
+  immutable severity-change entry, and saves the updated case profile.
+- CaseService
+  Service facade for the case-management workflow.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Persist the new severity, SLA, and priority values.
+- Case
+  Holds the current and updated severity/priority profile.
+- SeverityLevel + PriorityState
+  Represent the changed severity and the resulting priority state.
+- SLAManager
+  Recalculates the SLA threshold after the severity change.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the previous and new severity values with timestamp.
+- CaseSeverityUpdateResult
+  Returns the update result to the UI.
+
+How the implementation works
+1. The supervisor opens an eligible case.
+2. SeverityUpdateController validates authority and input.
+3. SLAManager recalculates SLA and priority from the new severity.
+4. CaseRepositoryImpl saves the updated severity profile.
+5. ChainOfCustodyLog records the change as an immutable log entry.
+
+----------------------------------------------------------------------
+UC7 - MARK EVIDENCE AS TAMPERED
+Actor: Digital Forensic Analyst
+----------------------------------------------------------------------
+Primary classes
+- EvidenceController
+  Gives the analyst access to evidence decision actions.
+- TamperMarkController
+  Direct implementation of the tampered decision. It requires a prior
+  verification snapshot, marks evidence as tampered, logs the action,
+  and triggers the case freeze workflow.
+- EvidenceService
+  Service facade for evidence decisions.
+
+Supporting classes
+- EvidenceRepository + EvidenceRepositoryImpl
+  Persist the evidence status update to "Tampered".
+- CaseRepository + CaseRepositoryImpl
+  Persist the resulting case freeze transition.
+- Evidence
+  Stores original hash, recalculated hash, and status.
+- Case
+  Performs the automatic freeze transition.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the tampered decision and mismatched hash context.
+- EvidenceDecisionResult + EvidenceSnapshot
+  Return the decision result to the UI.
+- EvidenceStatus + CaseState
+  Represent the tampered evidence status and frozen case state.
+
+How the implementation works
+1. UC3 must already have stored a verification snapshot.
+2. TamperMarkController confirms that original and recalculated hashes
+   do not match.
+3. EvidenceRepositoryImpl marks the Evidence as "Tampered".
+4. Case.triggerFreezeWorkflow() moves the case to "Frozen".
+5. CaseRepositoryImpl stores the frozen state.
+6. ChainOfCustodyLog records the decision.
+
+Document vs current code
+- The PDF frames UC7 as part of the hash recalculation activity.
+- The current code expects hash recalculation to have already happened
+  in UC3, and UC7 only finalizes the tampered outcome.
+
+----------------------------------------------------------------------
+UC8 - REOPEN FROZEN CASE
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- CaseStateTransitionController
+  Hosts the reopen workflow in the case-state module.
+- ReopenController
+  Direct implementation of reopen. It validates the supervisor role,
+  validates the reopen reason, records the reopen action, transitions
+  the case back to supervisor review, and notifies relevant users.
+- CaseStateTransitionService
+  Service facade for freeze/reopen logic.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Persist the state change from "Frozen" to "Supervisor Review".
+- UserRepository + UserRepositoryImpl
+  Resolve the assigned officer and the latest freezing analyst.
+- Case
+  Validates frozen-state reopening and performs the transition.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the reopen action.
+- NotificationService + NotificationRepository + NotificationRecord
+  Notify the investigating officer and analyst about reopening.
+- CaseReopenResult + CaseReopenNotificationResult
+  Return outcome and notification details to the UI.
+
+How the implementation works
+1. The supervisor opens a frozen case.
+2. ReopenController validates authority and the reopen reason.
+3. Case.reopenToSupervisorReview() moves the case back to
+   "Supervisor Review".
+4. CaseRepositoryImpl saves the new state.
+5. ChainOfCustodyLog records the reopen entry.
+6. NotificationService informs the assigned officer and analyst.
+
+----------------------------------------------------------------------
+UC9 - MARK EVIDENCE AS VERIFIED
+Actor: Digital Forensic Analyst
+----------------------------------------------------------------------
+Primary classes
+- EvidenceController
+  Hosts the analyst-side evidence decision workflow.
+- VerificationMarkController
+  Direct implementation of the verified decision. It requires a prior
+  verification snapshot, checks that hashes match, marks the evidence as
+  verified, and records the decision.
+- EvidenceService
+  Service facade for evidence decisions.
+
+Supporting classes
+- EvidenceRepository + EvidenceRepositoryImpl
+  Persist the evidence status change to "Verified".
+- CaseRepository + CaseRepositoryImpl
+  Load the case context and case state required for validation.
+- Evidence
+  Provides the stored verification snapshot and hash comparison helper.
+- Case
+  Enforces state readiness before verified evidence can be accepted.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the verified decision with the matching hash values.
+- EvidenceDecisionResult + EvidenceSnapshot
+  Return the decision outcome to the UI.
+- EvidenceStatus + CaseState
+  Represent the verified evidence status and the surrounding case state.
+
+How the implementation works
+1. UC3 must already have stored a verification snapshot.
+2. VerificationMarkController checks that the original and
+   recalculated hashes match.
+3. EvidenceRepositoryImpl marks the Evidence as "Verified".
+4. ChainOfCustodyLog records the verification decision.
+
+Document vs current code
+- The PDF says UC9 should also move the case from "Forensic Review" to
+  "Supervisor Review".
+- The current code does not transition the case in UC9. The case stays
+  in the forensic-review path until UC11 submits it for supervisor
+  review.
+
+----------------------------------------------------------------------
+UC10 - GENERATE SUMMARY REPORT
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- ReportController
+  Main UI controller for report filters, generation, and export.
+- ReportService
+  Direct implementation of report generation. It validates the
+  supervisor role, gathers report data, builds the summary result, logs
+  the report action, and exports CSV/PDF output when requested.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Query cases by report parameters and aggregate report data.
+- SummaryReportRequest
+  Carries the report filters from the UI.
+- SummaryReportResult + SummaryReportCaseRecord + SummaryReportCaseFilter
+  Represent the report output, records, and applied filters.
+- SeverityLevel + PriorityState + CaseState + EvidenceStatus
+  Provide the report's filtering and status breakdown dimensions.
+- AuditLogService + AuditRepository + AuditLog
+  Record the report-generation action in the audit log.
+
+How the implementation works
+1. The supervisor selects filters in the report module.
+2. ReportController sends the request to ReportService.
+3. ReportService queries CaseRepositoryImpl for the requested case data.
+4. The service builds SummaryReportResult and related record objects.
+5. AuditLogService records the report-generation event.
+6. The module returns the summary and can export it to CSV or PDF.
+
+----------------------------------------------------------------------
+UC11 - SUBMIT CASE FOR SUPERVISOR REVIEW
+Actor: Investigating Officer
+----------------------------------------------------------------------
+Primary classes
+- SubmitReviewController
+  UI entry point for case submission.
+- SubmissionController
+  Direct implementation of submission. It validates officer ownership,
+  confirms evidence readiness, records the submission, moves the case to
+  supervisor review, and notifies supervisors.
+- CaseSubmissionService
+  Service facade for the submission workflow.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Persist the case transition to "Supervisor Review".
+- EvidenceRepository + EvidenceRepositoryImpl
+  Confirm that the latest evidence satisfies the submission rules.
+- Case
+  Validates that the case is in an eligible state for submission.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the submission action with actor and timestamp.
+- NotificationService + NotificationRepository + NotificationRecord
+  Notify supervisors that the case is ready for review.
+- CaseSubmissionResult
+  Returns the submission outcome to the UI.
+- CaseState + EvidenceStatus
+  Represent the state/status preconditions and postconditions.
+
+How the implementation works
+1. The investigating officer opens a case that has completed forensic
+   handling.
+2. SubmissionController verifies officer assignment and evidence status.
+3. Case.moveToState(...) transitions the case to "Supervisor Review".
+4. CaseRepositoryImpl stores the new state.
+5. ChainOfCustodyLog records the submission.
+6. NotificationService sends the review notifications to supervisors.
+
+----------------------------------------------------------------------
+UC12 - REASSIGN INVESTIGATING OFFICER
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- CaseController
+  Hosts the reassignment UI within the case-management module.
+- ReassignmentController
+  Direct implementation of reassignment. It validates supervisor role,
+  validates the new officer, records the reassignment entry, updates the
+  assigned officer, moves the case to "Case Reassigned", and notifies
+  both officers.
+- CaseService
+  Service facade for case-management actions including reassignment.
+
+Supporting classes
+- AbstractCaseWorkflowController
+  Shared transaction, user lookup, and case lookup support.
+- CaseRepository + CaseRepositoryImpl
+  Persist the officer change and resulting case state.
+- UserRepository + UserRepositoryImpl
+  Load the previous officer and new officer.
+- Case + User
+  Represent the reassigned case and the affected actors.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the previous and new officer identities with timestamp.
+- NotificationService + NotificationRepository + NotificationRecord
+  Notify the outgoing and incoming investigating officers.
+- CaseReassignmentResult + NotificationDispatchResult
+  Return reassignment and notification status to the UI.
+- CaseState
+  Represents the "Case Reassigned" output state.
+
+How the implementation works
+1. The supervisor selects an active case and a new officer.
+2. ReassignmentController validates authority and user roles.
+3. CaseRepositoryImpl updates the assigned officer and case state.
+4. ChainOfCustodyLog records the reassignment entry.
+5. NotificationService sends notifications to the relevant officers.
+
+----------------------------------------------------------------------
+UC13 - VIEW CHAIN-OF-CUSTODY LOG
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- LogViewerController
+  Main UI controller for read-only chain-of-custody inspection.
+- ChainOfCustodyViewerService
+  Direct implementation of the log-viewing use case. It validates the
+  supervisor context, retrieves immutable entries, and packages them for
+  the UI.
+
+Supporting classes
+- ChainOfCustodyLog
+  Retrieves the immutable log history for a case.
+- AuditRepository + AuditRepositoryImpl
+  Supply the stored audit/log entries from persistence.
+- CaseRepository + CaseRepositoryImpl
+  Load the case so the viewer can interpret current state and inspection
+  context.
+- ChainOfCustodySnapshot
+  Bundles the case, current review flags, and log entries for display.
+- AuditLog
+  Represents each immutable chain-of-custody record.
+- Case
+  Supplies the case context used alongside the log.
+
+How the implementation works
+1. The supervisor chooses a case for inspection.
+2. ChainOfCustodyViewerService loads the case and retrieves all immutable
+   entries through ChainOfCustodyLog.
+3. ChainOfCustodySnapshot is returned to LogViewerController for
+   chronological display in read-only form.
+
+Document vs current code
+- The PDF says a frozen and unacknowledged case should transition to
+  "Under Supervisory Inspection".
+- The current code does not create a formal new case state for that.
+  Instead, ChainOfCustodySnapshot exposes an inspection-mode flag for the
+  UI.
+
+----------------------------------------------------------------------
+UC14 - REVIEW ESCALATED CASE
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- ReviewEscalatedCaseController
+  UI entry point for escalated-case review.
+- EscalatedCaseController
+  Direct implementation of the escalated review. It validates the
+  supervisor role, confirms that the case is escalated and has breached
+  SLA, records review instructions, and changes the priority state to
+  "Under Active Review".
+- EscalatedCaseReviewService
+  Service facade for escalated-case review and snapshot loading.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Load the case and persist the updated priority state.
+- EscalatedCaseReviewRepository + EscalatedCaseReviewRepositoryImpl
+  Persist the supervisor's review instructions and review decision data.
+- EscalatedCaseReview
+  Represents the persisted escalation review record.
+- EscalatedCaseSnapshot + EscalatedCaseReviewResult
+  Return case context and review outcome to the UI.
+- Case
+  Supplies the case state, severity, SLA, and priority information used
+  during escalation handling.
+- SLAManager
+  Supports the breached-SLA logic that determines escalation readiness.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the review action and instructions.
+- PriorityState + SeverityLevel
+  Represent the escalation and review-priority values.
+
+How the implementation works
+1. The supervisor opens a case that is marked escalated.
+2. EscalatedCaseController confirms that SLA has been breached and that
+   the case is in the correct priority state.
+3. The controller records the review instructions.
+4. CaseRepositoryImpl updates priority from "Escalated" to
+   "Under Active Review".
+5. EscalatedCaseReviewRepositoryImpl stores the review record.
+6. ChainOfCustodyLog records the action.
+
+Document vs current code
+- The PDF implies the workflow should acknowledge the supervisory
+  response to relevant parties.
+- The current code records the review and updates priority, but no
+  NotificationService call is wired into UC14.
+
+----------------------------------------------------------------------
+UC15 - REJECT CASE CLOSURE
+Actor: Supervisory Authority
+----------------------------------------------------------------------
+Primary classes
+- ManageCaseClosureController
+  Hosts the reject-closure action in the closure module.
+- RejectionController
+  Direct implementation of closure rejection. It validates supervisor
+  role, requires a reason, records the rejection, and returns the case
+  to forensic review.
+- CaseClosureService
+  Service facade for closure decision flows.
+
+Supporting classes
+- CaseRepository + CaseRepositoryImpl
+  Persist the transition back to "Forensic Review".
+- CaseClosureDecisionRepository + CaseClosureDecisionRepositoryImpl
+  Persist the rejection decision.
+- CaseClosureDecision + CaseClosureDecisionType
+  Represent the stored rejection data.
+- CaseClosureSnapshot + CaseClosureRejectionResult
+  Return case and rejection outcome data to the UI.
+- Case
+  Enforces the state rollback to forensic review.
+- ChainOfCustodyLog + AuditRepository + AuditLog
+  Record the rejection reason and timestamp.
+
+How the implementation works
+1. The supervisor reviews a case in supervisor-review state.
+2. RejectionController validates authority and the provided rejection
+   reason.
+3. Case.returnToForensicReview() moves the case back to "Forensic
+   Review".
+4. CaseRepositoryImpl stores the updated state.
+5. CaseClosureDecisionRepositoryImpl stores the rejection record.
+6. ChainOfCustodyLog records the action.
+
+Document vs current code
+- The PDF says the rejection reason is optional.
+- The current code requires a nonblank reason.
+- The PDF says the case returns to the Digital Forensic Analyst for
+  further investigation.
+- The current code changes the state back to "Forensic Review" but does
+  not send an analyst notification as part of UC15.
+
+======================================================================
+4. MASTER CLASS TO USE-CASE INDEX
+This section accounts for every Java source file in src/main/java.
+======================================================================
+
+SYSTEM / MODULE SHELL
+- module-info.java -> Module declaration only; no direct UC mapping.
+- CaseManagementApplication -> Shared bootstrap for all UC1 to UC15.
+
+CONTROLLERS
+- AbstractCaseWorkflowController -> Shared base for UC1, UC6, and UC12.
+- CaseClosureController -> UC5.
+- CaseController -> UC1, UC6, UC12.
+- CaseFreezeController -> UC4.
+- CaseRegistrationController -> UC1.
+- CaseStateTransitionController -> UC4, UC8.
+- DashboardController -> Shared navigation entry to UC1 to UC15.
+- EscalatedCaseController -> UC14.
+- EvidenceController -> UC2, UC3, UC7, UC9.
+- EvidenceUploadController -> UC2.
+- IntegrityVerificationController -> UC3.
+- LoginController -> Shared authentication precondition for UC1 to UC15.
+- LogViewerController -> UC13.
+- ManageCaseClosureController -> UC5, UC15.
+- NotificationController -> Supports notification outputs for UC5, UC8,
+  UC11, and UC12.
+- ReassignmentController -> UC12.
+- RejectionController -> UC15.
+- ReopenController -> UC8.
+- ReportController -> UC10.
+- ReviewEscalatedCaseController -> UC14.
+- SeverityUpdateController -> UC6.
+- SignUpController -> Outside the UC1 to UC15 scope of the PDF.
+- SubmissionController -> UC11.
+- SubmitReviewController -> UC11.
+- TamperMarkController -> UC7 and supports UC4 via auto-freeze.
+- VerificationMarkController -> UC9.
+
+MODELS / ENUMS
+- AuditLog -> Shared immutable record model for UC1, UC2, UC3, UC4,
+  UC5, UC6, UC7, UC8, UC10, UC11, UC12, UC13, UC14, and UC15.
+- Case -> Core domain model used across UC1 to UC15.
+- CaseClosureDecision -> UC5, UC15.
+- CaseClosureDecisionType -> UC5, UC15.
+- CaseState -> Shared state enum for UC1 to UC15.
+- EscalatedCaseReview -> UC14.
+- Evidence -> UC2, UC3, UC7, UC9.
+- EvidenceStatus -> Primarily UC2, UC3, UC7, UC9, and used as a
+  prerequisite in UC5 and UC11.
+- NotificationRecord -> Supports notification outputs in UC5, UC8,
+  UC11, and UC12.
+- PriorityState -> UC1, UC6, UC10, UC14.
+- SeverityLevel -> UC1, UC6, UC10, UC14.
+- SummaryReportCaseFilter -> UC10.
+- SummaryReportCaseRecord -> UC10.
+- SummaryReportRequest -> UC10.
+- User -> Shared actor model for UC1 to UC15.
+- UserRole -> Shared role/authorization enum for UC1 to UC15.
+
+REPOSITORIES
+- AuditRepository -> Shared persistence for logs used in UC1, UC2, UC3,
+  UC4, UC5, UC6, UC7, UC8, UC10, UC11, UC12, UC13, UC14, and UC15.
+- AuditRepositoryImpl -> Same mapping as AuditRepository.
+- CaseClosureDecisionRepository -> UC5, UC15.
+- CaseClosureDecisionRepositoryImpl -> UC5, UC15.
+- CaseRepository -> Shared case persistence across UC1 to UC15.
+- CaseRepositoryImpl -> Shared case persistence across UC1 to UC15.
+- EscalatedCaseReviewRepository -> UC14.
+- EscalatedCaseReviewRepositoryImpl -> UC14.
+- EvidenceRepository -> UC2, UC3, UC7, UC9.
+- EvidenceRepositoryImpl -> UC2, UC3, UC7, UC9.
+- NotificationRepository -> UC5, UC8, UC11, UC12.
+- NotificationRepositoryImpl -> UC5, UC8, UC11, UC12.
+- UserRepository -> Shared actor lookup/authentication for UC1 to UC15.
+- UserRepositoryImpl -> Shared actor lookup/authentication for UC1 to
+  UC15.
+
+SERVICES, SNAPSHOTS, AND RESULT OBJECTS
+- AuditLogService -> Directly used in UC1, UC5, and UC10; shared audit
+  helper elsewhere.
+- AuthService -> Shared authentication precondition for UC1 to UC15.
+- CaseClosureApprovalResult -> UC5.
+- CaseClosureRejectionResult -> UC15.
+- CaseClosureService -> UC5, UC15.
+- CaseClosureSnapshot -> UC5, UC15.
+- CaseFreezeResult -> UC4.
+- CaseReassignmentResult -> UC12.
+- CaseReopenNotificationResult -> UC8.
+- CaseReopenResult -> UC8.
+- CaseService -> UC1, UC6, UC12.
+- CaseSeverityUpdateResult -> UC6.
+- CaseStateTransitionService -> UC4, UC8.
+- CaseSubmissionResult -> UC11.
+- CaseSubmissionService -> UC11.
+- ChainOfCustodyLog -> UC2, UC3, UC4, UC6, UC7, UC8, UC9, UC11, UC12,
+  UC13, UC14, and UC15.
+- ChainOfCustodySnapshot -> UC13.
+- ChainOfCustodyViewerService -> UC13.
+- EscalatedCaseReviewResult -> UC14.
+- EscalatedCaseReviewService -> UC14.
+- EscalatedCaseSnapshot -> UC14.
+- EvidenceDecisionResult -> UC7, UC9.
+- EvidenceService -> UC2, UC3, UC7, UC9.
+- EvidenceSnapshot -> UC2, UC3, UC7, UC9.
+- EvidenceUploadResult -> UC2.
+- HashService -> UC2, UC3, UC7, UC9.
+- IntegrityVerificationResult -> UC3.
+- LogService -> Thin wrapper around AuditLogService; no clear direct
+  UC ownership in the current implementation.
+- NotificationDispatchResult -> UC12.
+- NotificationService -> UC5, UC8, UC11, UC12.
+- ReportService -> UC10.
+- SecureFileStorage -> UC2.
+- SignUpException -> Outside the UC1 to UC15 scope of the PDF.
+- SignUpService -> Outside the UC1 to UC15 scope of the PDF.
+- SLAManager -> UC1, UC6, UC14.
+- SummaryReportResult -> UC10.
+
+UTILITIES
+- AppNavigator -> Shared navigation support for UC1 to UC15.
+- DBConnection -> Shared database infrastructure for UC1 to UC15.
+- IdGenerator -> UC1.
+- PasswordUtil -> Shared authentication utility; supports login
+  preconditions rather than direct UC1 to UC15 business flow.
+
+======================================================================
+5. HIGH-LEVEL TAKEAWAYS
+======================================================================
+1. The codebase is strongly package-organized by layer:
+   controllers -> services -> repositories -> models/utilities.
+
+2. The strongest one-to-one use-case implementations are:
+   UC1, UC2, UC4, UC5, UC6, UC8, UC10, UC11, UC12, UC13, UC14, and UC15.
+
+3. The evidence-integrity path is intentionally split in code:
+   UC3 performs hash comparison, while UC7 and UC9 finalize the result.
+
+4. The major document-to-code differences are:
+   - UC3 outcome finalization is split into UC7 and UC9.
+   - UC9 does not directly move the case to Supervisor Review.
+   - UC13 uses an inspection flag instead of a formal new state.
+   - UC14 does not currently notify relevant parties.
+   - UC15 requires a reason even though the PDF marks it optional.
+
+5. The classes outside the PDF's UC1 to UC15 scope are mainly the
+   signup-specific classes:
+   SignUpController, SignUpService, and SignUpException.
