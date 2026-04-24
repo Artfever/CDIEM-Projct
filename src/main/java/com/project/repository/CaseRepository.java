@@ -4,9 +4,12 @@ import com.project.model.Case;
 import com.project.model.CaseState;
 import com.project.model.PriorityState;
 import com.project.model.SeverityLevel;
+import com.project.model.SummaryReportCaseRecord;
+import com.project.model.SummaryReportRequest;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 public interface CaseRepository {
@@ -23,4 +26,7 @@ public interface CaseRepository {
     void updateState(Connection connection, int caseId, CaseState caseState) throws SQLException;
 
     Optional<Case> findById(Connection connection, int caseId) throws SQLException;
+
+    List<SummaryReportCaseRecord> findCasesForSummaryReport(Connection connection,
+                                                           SummaryReportRequest request) throws SQLException;
 }

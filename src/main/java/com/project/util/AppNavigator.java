@@ -8,6 +8,7 @@ import com.project.controller.DashboardController;
 import com.project.controller.EvidenceController;
 import com.project.controller.LogViewerController;
 import com.project.controller.NotificationController;
+import com.project.controller.ReportController;
 import com.project.controller.ReviewEscalatedCaseController;
 import com.project.controller.SubmitReviewController;
 import com.project.model.User;
@@ -107,6 +108,15 @@ public final class AppNavigator {
         controller.setCurrentUser(currentUser);
         showScene(root, "/view/review_escalated_case.css", "CDIEM | Review Escalated Case",
                 1180, 860, 1000, 760);
+    }
+
+    public static void showSummaryReport(User currentUser) {
+        FXMLLoader loader = newLoader("/view/summary_report.fxml");
+        Parent root = load(loader);
+        ReportController controller = loader.getController();
+        controller.setCurrentUser(currentUser);
+        showScene(root, "/view/summary_report.css", "CDIEM | Generate Summary Report",
+                1260, 900, 1080, 780);
     }
 
     private static Parent loadRoot(String fxmlPath) {

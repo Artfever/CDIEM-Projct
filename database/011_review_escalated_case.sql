@@ -32,10 +32,3 @@ BEGIN
         ON dbo.EscalatedCaseReviews (CaseID, ReviewedAt DESC, ReviewID DESC);
 END
 GO
-
-
-    private int generateUniqueCaseID(int storedCaseId) {
-  88:         return idGenerator.generateUniqueCaseID(storedCaseId);
-  89:     }
-  90: }
-

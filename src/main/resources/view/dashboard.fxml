@@ -166,7 +166,7 @@
                                                         <Label text="Generate Summary Report" styleClass="module-title" />
                                                         <Label text="Filter across case status, severity, and time windows for analytics." styleClass="module-text" wrapText="true" />
                                                         <Label text="Use Case: UC10" styleClass="module-meta" />
-                                                        <Button mnemonicParsing="false" onAction="#showComingSoon" text="Coming Soon" styleClass="module-button" />
+                                                        <Button mnemonicParsing="false" onAction="#openSummaryReport" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />

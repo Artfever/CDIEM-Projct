@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.6"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.project.controller.ReportController"
+           styleClass="report-root">
+    <children>
+        <BorderPane maxWidth="1300.0" prefWidth="1240.0" styleClass="report-shell">
+            <top>
+                <HBox alignment="CENTER_LEFT" spacing="18.0" styleClass="report-header">
+                    <children>
+                        <VBox spacing="4.0">
+                            <children>
+                                <Label text="CDIEM" styleClass="app-tag" />
+                                <Label text="Generate Summary Report" styleClass="view-title" />
+                                <Label fx:id="subtitleLabel"
+                                       text="Generate aggregate case intelligence across status, priority, SLA, and tamper outcomes."
+                                       styleClass="view-subtitle"
+                                       wrapText="true" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox alignment="CENTER_RIGHT" spacing="5.0">
+                            <children>
+                                <Label fx:id="roleLabel" text="Role" styleClass="header-chip" />
+                                <Label fx:id="identityLabel" text="Identity" styleClass="identity-label" />
+                            </children>
+                        </VBox>
+                        <Button mnemonicParsing="false"
+                                onAction="#goBackToDashboard"
+                                text="Dashboard"
+                                styleClass="action-button secondary-action" />
+                    </children>
+                    <padding>
+                        <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+                    </padding>
+                </HBox>
+            </top>
+            <center>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="report-scroll">
+                    <content>
+                        <VBox spacing="18.0" styleClass="content-pane">
+                            <padding>
+                                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                            </padding>
+                            <children>
+                                <HBox alignment="TOP_LEFT" spacing="18.0">
+                                    <children>
+                                        <VBox HBox.hgrow="ALWAYS" spacing="18.0">
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Report Parameters" styleClass="panel-title" />
+                                                            <Label text="Filter the report by date range, report case filter, and priority before generating the summary metrics."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="14.0" vgap="14.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="120.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="220.0" />
+                                                            <ColumnConstraints halignment="LEFT" minWidth="120.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="220.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="From Date" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <DatePicker fx:id="fromDatePicker"
+                                                                        promptText="Any"
+                                                                        styleClass="field-input"
+                                                                        GridPane.columnIndex="1"
+                                                                        GridPane.rowIndex="0" />
+
+                                                            <Label text="To Date" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                                            <DatePicker fx:id="toDatePicker"
+                                                                        promptText="Any"
+                                                                        styleClass="field-input"
+                                                                        GridPane.columnIndex="3"
+                                                                        GridPane.rowIndex="0" />
+
+                                                            <Label text="Case Filter" styleClass="field-label" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                            <ComboBox fx:id="caseFilterBox"
+                                                                      promptText="Select report case filter"
+                                                                      styleClass="field-input"
+                                                                      GridPane.columnIndex="1"
+                                                                      GridPane.rowIndex="1" />
+
+                                                            <Label text="Priority" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                            <ComboBox fx:id="priorityFilterBox"
+                                                                      promptText="Any Priority"
+                                                                      styleClass="field-input"
+                                                                      GridPane.columnIndex="3"
+                                                                      GridPane.rowIndex="1" />
+                                                        </children>
+                                                    </GridPane>
+                                                    <HBox spacing="10.0">
+                                                        <children>
+                                                            <Button fx:id="generateReportButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#generateReport"
+                                                                    text="Generate Report"
+                                                                    styleClass="action-button primary-action" />
+                                                            <Button fx:id="resetFiltersButton"
+                                                                    mnemonicParsing="false"
+                                                                    onAction="#clearFilters"
+                                                                    text="Reset Filters"
+                                                                    styleClass="action-button secondary-action" />
+                                                        </children>
+                                                    </HBox>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Overview Metrics" styleClass="panel-title" />
+                                                            <Label text="High-level counts derived from the currently matched cases."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <FlowPane fx:id="overviewMetricsPane" hgap="12.0" prefWrapLength="760.0" vgap="12.0" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Status Distribution" styleClass="panel-title" />
+                                                            <Label text="Counts grouped by the actual workflow state of matched cases."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <FlowPane fx:id="statusDistributionPane" hgap="12.0" prefWrapLength="760.0" vgap="12.0" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Severity Distribution" styleClass="panel-title" />
+                                                            <Label text="Counts grouped by case severity for the current report scope."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <FlowPane fx:id="severityDistributionPane" hgap="12.0" prefWrapLength="760.0" vgap="12.0" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Matching Cases" styleClass="panel-title" />
+                                                            <Label text="Detailed case records included in the generated report."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <Label fx:id="emptyStateLabel"
+                                                           text="Generate a report to review matching cases."
+                                                           wrapText="true"
+                                                           styleClass="empty-state" />
+                                                    <VBox fx:id="matchingCasesContainer" spacing="12.0" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+                                        </VBox>
+
+                                        <VBox prefWidth="360.0" spacing="18.0">
+                                            <VBox spacing="16.0" styleClass="panel panel-side">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Report Snapshot" styleClass="panel-title" />
+                                                            <Label text="The latest generated report context and quick auditable metadata."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <GridPane hgap="12.0" vgap="12.0">
+                                                        <columnConstraints>
+                                                            <ColumnConstraints halignment="LEFT" minWidth="130.0" />
+                                                            <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" />
+                                                        </columnConstraints>
+                                                        <children>
+                                                            <Label text="Generated By" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                                            <Label fx:id="generatedByValueLabel" text="No report generated" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                                            <Label text="Generated At" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                                            <Label fx:id="generatedAtValueLabel" text="Unavailable" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                                            <Label text="Date Range" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                                            <Label fx:id="dateRangeValueLabel" text="Any" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                                            <Label text="Case Filter" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                                            <Label fx:id="caseFilterValueLabel" text="All Matching Cases" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                                            <Label text="Priority" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                                            <Label fx:id="priorityFilterValueLabel" text="Any Priority" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                                            <Label text="Matched Cases" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                                                            <Label fx:id="matchedCasesValueLabel" text="0" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                                                            <Label text="SLA Summary" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                                                            <Label fx:id="slaSummaryValueLabel" text="Awaiting report" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+                                                            <Label text="Frozen Cases" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                                                            <Label fx:id="frozenSummaryValueLabel" text="0" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+
+                                                            <Label text="Tampered Cases" styleClass="snapshot-key" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+                                                            <Label fx:id="tamperedSummaryValueLabel" text="0" wrapText="true" styleClass="snapshot-value" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                                                        </children>
+                                                    </GridPane>
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="16.0" styleClass="panel panel-main">
+                                                <children>
+                                                    <VBox spacing="4.0">
+                                                        <children>
+                                                            <Label text="Export Report" styleClass="panel-title" />
+                                                            <Label text="Download the current report output as either CSV or PDF."
+                                                                   styleClass="panel-subtitle"
+                                                                   wrapText="true" />
+                                                        </children>
+                                                    </VBox>
+                                                    <Button fx:id="exportCsvButton"
+                                                            mnemonicParsing="false"
+                                                            onAction="#exportCsv"
+                                                            text="Export CSV"
+                                                            styleClass="action-button primary-action" />
+                                                    <Button fx:id="exportPdfButton"
+                                                            mnemonicParsing="false"
+                                                            onAction="#exportPdf"
+                                                            text="Export PDF"
+                                                            styleClass="action-button secondary-action" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                                                </padding>
+                                            </VBox>
+
+                                            <VBox spacing="8.0" styleClass="context-card">
+                                                <children>
+                                                    <Label text="Workflow Access" styleClass="context-title" />
+                                                    <Label fx:id="accessSummaryLabel"
+                                                           text="Role-aware workflow summary appears here."
+                                                           styleClass="context-text"
+                                                           wrapText="true" />
+                                                </children>
+                                                <padding>
+                                                    <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+                                                </padding>
+                                            </VBox>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <Label fx:id="statusLabel" text="Ready." wrapText="true" styleClass="status-banner status-neutral" />
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+    </children>
+</StackPane>

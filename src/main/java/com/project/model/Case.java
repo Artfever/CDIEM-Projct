@@ -14,14 +14,23 @@ public class Case {
     private Integer assignedOfficerId;
     private String assignedOfficerName;
     private LocalDateTime createdAt;
+    private LocalDateTime closedAt;
 
     public Case(String title, String description, SeverityLevel severity, String relatedInfo) {
-        this(null, title, description, relatedInfo, severity, null, null, CaseState.CASE_CREATED, null, null, null);
+        this(null, title, description, relatedInfo, severity, null, null, CaseState.CASE_CREATED, null, null, null, null);
     }
 
     public Case(Integer caseId, String title, String description, String relatedInfo, SeverityLevel severity,
                 Integer slaHours, PriorityState priorityState, CaseState status,
                 Integer assignedOfficerId, String assignedOfficerName, LocalDateTime createdAt) {
+        this(caseId, title, description, relatedInfo, severity, slaHours, priorityState, status,
+                assignedOfficerId, assignedOfficerName, createdAt, null);
+    }
+
+    public Case(Integer caseId, String title, String description, String relatedInfo, SeverityLevel severity,
+                Integer slaHours, PriorityState priorityState, CaseState status,
+                Integer assignedOfficerId, String assignedOfficerName, LocalDateTime createdAt,
+                LocalDateTime closedAt) {
         this.caseId = caseId;
         this.title = title;
         this.description = description;
@@ -33,6 +42,7 @@ public class Case {
         this.assignedOfficerId = assignedOfficerId;
         this.assignedOfficerName = assignedOfficerName;
         this.createdAt = createdAt;
+        this.closedAt = closedAt;
     }
 
     public Integer getCaseId() {
@@ -255,5 +265,13 @@ public class Case {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getClosedAt() {
+        return closedAt;
+    }
+
+    public void setClosedAt(LocalDateTime closedAt) {
+        this.closedAt = closedAt;
     }
 }
