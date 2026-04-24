@@ -8,5 +8,6 @@
     <file url="file://$PROJECT_DIR$/database/008_manage_evidence_workflow.sql" dialect="TSQL" />
     <file url="file://$PROJECT_DIR$/database/009_manage_case_state_transitions.sql" dialect="TSQL" />
     <file url="file://$PROJECT_DIR$/database/010_manage_case_closure.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/database/testing.sql" dialect="TSQL" />
   </component>
 </project>
