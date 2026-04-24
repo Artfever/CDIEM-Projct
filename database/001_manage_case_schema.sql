@@ -112,3 +112,5 @@ BEGIN
     INSERT INTO dbo.Users (Name, Role) VALUES ('Omar Siddiqui', 'SUPERVISOR');
 END
 GO
+
+SELECT * from Users;

@@ -36,9 +36,6 @@ public class DashboardController {
     private VBox notificationsCard;
 
     @FXML
-    private VBox verifyIntegrityCard;
-
-    @FXML
     private VBox stateTransitionsCard;
 
     @FXML
@@ -150,11 +147,6 @@ public class DashboardController {
     }
 
     @FXML
-    public void showComingSoon() {
-        setStatus("This module shell is visible for your role, but the workflow is not implemented yet.", STATUS_NEUTRAL);
-    }
-
-    @FXML
     public void logout() {
         AppNavigator.showLogin();
     }
@@ -172,7 +164,6 @@ public class DashboardController {
         configureCard(manageCaseCard, hasAccess(currentUser.getRole(), "manageCase"));
         configureCard(manageEvidenceCard, hasAccess(currentUser.getRole(), "manageEvidence"));
         configureCard(notificationsCard, hasAccess(currentUser.getRole(), "notifications"));
-        configureCard(verifyIntegrityCard, hasAccess(currentUser.getRole(), "verifyIntegrity"));
         configureCard(stateTransitionsCard, hasAccess(currentUser.getRole(), "stateTransitions"));
         configureCard(submitReviewCard, hasAccess(currentUser.getRole(), "submitReview"));
         configureCard(closureCard, hasAccess(currentUser.getRole(), "closure"));
@@ -189,9 +180,9 @@ public class DashboardController {
 
     private String buildAccessibleModulesText(UserRole role) {
         return switch (role) {
-            case OFFICER -> "Accessible modules: Manage Case, Notifications, Manage Evidence, Submit Case for Supervisor Review.";
-            case ANALYST -> "Accessible modules: Notifications, Manage Evidence, Verify Evidence Integrity, Manage Case State Transitions.";
-            case SUPERVISOR -> "Accessible modules: Manage Case, Notifications, Manage Case State Transitions, Manage Case Closure, View Chain-of-Custody Log, Generate Summary Report, Review Escalated Case.";
+            case OFFICER -> "Available to you: Manage Case, Notifications, Manage Evidence, and Submit Case for Supervisor Review.";
+            case ANALYST -> "Available to you: Notifications, Manage Evidence, and Manage Case State Transitions.";
+            case SUPERVISOR -> "Available to you: Manage Case, Notifications, Manage Case State Transitions, Manage Case Closure, View Chain-of-Custody Log, Generate Summary Report, and Review Escalated Case.";
         };
     }
 
@@ -200,7 +191,6 @@ public class DashboardController {
             case "manageCase" -> role == UserRole.OFFICER || role == UserRole.SUPERVISOR;
             case "notifications" -> true;
             case "manageEvidence" -> role == UserRole.OFFICER || role == UserRole.ANALYST;
-            case "verifyIntegrity" -> role == UserRole.ANALYST;
             case "stateTransitions" -> role == UserRole.ANALYST || role == UserRole.SUPERVISOR;
             case "submitReview" -> role == UserRole.OFFICER;
             case "closure", "chainLog", "summaryReport", "escalatedReview" -> role == UserRole.SUPERVISOR;

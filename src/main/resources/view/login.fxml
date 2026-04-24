@@ -20,8 +20,8 @@
                 <VBox spacing="6.0">
                     <children>
                         <Label text="CDIEM" styleClass="login-tag" />
-                        <Label text="Secure Access" styleClass="login-title" />
-                        <Label text="Sign in once, then load the dashboard features allowed for your role." styleClass="login-subtitle" wrapText="true" />
+                        <Label text="Access Portal" styleClass="login-title" />
+                        <Label text="Sign in to continue to your role-based case, evidence, and reporting workspace." styleClass="login-subtitle" wrapText="true" />
                     </children>
                 </VBox>
 

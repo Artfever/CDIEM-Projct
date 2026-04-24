@@ -53,7 +53,7 @@
                                     <children>
                                         <Label fx:id="welcomeLabel" text="Welcome" styleClass="hero-title" />
                                         <Label fx:id="accessibleModulesLabel" text="Accessible modules will appear here." styleClass="hero-text" wrapText="true" />
-                                        <Label text="Only modules mapped to your role remain visible. Unbuilt workflows stay marked as coming soon." styleClass="hero-text muted-text" wrapText="true" />
+                                        <Label text="Open the appropriate module to continue the tasks assigned to your role." styleClass="hero-text muted-text" wrapText="true" />
                                     </children>
                                     <padding>
                                         <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
@@ -69,7 +69,7 @@
                                                     <children>
                                                         <Label text="Manage Case" styleClass="module-title" />
                                                         <Label text="Case registration, severity change, and officer reassignment." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Cases: UC1, UC6, UC12" styleClass="module-meta" />
+                                                        <Label text="Case Intake and Assignment Control" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openManageCase" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -80,8 +80,8 @@
                                                 <VBox fx:id="manageEvidenceCard" prefWidth="340.0" spacing="10.0" styleClass="module-card">
                                                     <children>
                                                         <Label text="Manage Evidence" styleClass="module-title" />
-                                                        <Label text="Upload evidence files and update integrity outcomes." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Cases: UC2, UC7, UC9" styleClass="module-meta" />
+                                                        <Label text="Upload evidence files, review integrity results, and finalize evidence outcomes." styleClass="module-text" wrapText="true" />
+                                                        <Label text="Evidence Intake and Integrity Review" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openManageEvidence" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -93,20 +93,8 @@
                                                     <children>
                                                         <Label text="Notifications" styleClass="module-title" />
                                                         <Label text="Review system-generated alerts delivered to your user account." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Inbox: Reassignment Alerts" styleClass="module-meta" />
+                                                        <Label text="Operational Alerts and Workflow Updates" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openNotifications" text="Open Module" styleClass="module-button module-button-primary" />
-                                                    </children>
-                                                    <padding>
-                                                        <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
-                                                    </padding>
-                                                </VBox>
-
-                                                <VBox fx:id="verifyIntegrityCard" prefWidth="340.0" spacing="10.0" styleClass="module-card">
-                                                    <children>
-                                                        <Label text="Verify Evidence Integrity" styleClass="module-title" />
-                                                        <Label text="Recalculate SHA-256 values and determine verified or tampered evidence." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Case: UC3" styleClass="module-meta" />
-                                                        <Button mnemonicParsing="false" onAction="#showComingSoon" text="Coming Soon" styleClass="module-button" />
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
@@ -117,7 +105,7 @@
                                                     <children>
                                                         <Label text="Manage Case State Transitions" styleClass="module-title" />
                                                         <Label text="Freeze and reopen cases during forensic and supervisory review." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Cases: UC4, UC8" styleClass="module-meta" />
+                                                        <Label text="Freeze and Reopen Workflow Control" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openManageStateTransitions" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -129,7 +117,7 @@
                                                     <children>
                                                         <Label text="Submit Case for Supervisor Review" styleClass="module-title" />
                                                         <Label text="Move eligible cases from forensic completion to supervisor review." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Case: UC11" styleClass="module-meta" />
+                                                        <Label text="Review Submission and Handover" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openSubmitReview" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -141,7 +129,7 @@
                                                     <children>
                                                         <Label text="Manage Case Closure" styleClass="module-title" />
                                                         <Label text="Approve or reject closure based on verification and completeness." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Cases: UC5, UC15" styleClass="module-meta" />
+                                                        <Label text="Closure Approval and Exception Handling" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openManageCaseClosure" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -153,7 +141,7 @@
                                                     <children>
                                                         <Label text="View Chain-of-Custody Log" styleClass="module-title" />
                                                         <Label text="Inspect immutable action history for a selected case." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Case: UC13" styleClass="module-meta" />
+                                                        <Label text="Audit Trail and Custody History" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openChainOfCustodyLog" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -165,7 +153,7 @@
                                                     <children>
                                                         <Label text="Generate Summary Report" styleClass="module-title" />
                                                         <Label text="Filter across case status, severity, and time windows for analytics." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Case: UC10" styleClass="module-meta" />
+                                                        <Label text="Reporting, Metrics, and Trend Analysis" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openSummaryReport" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>
@@ -177,7 +165,7 @@
                                                     <children>
                                                         <Label text="Review Escalated Case" styleClass="module-title" />
                                                         <Label text="Respond to critical SLA breaches and issue supervisory instructions." styleClass="module-text" wrapText="true" />
-                                                        <Label text="Use Case: UC14" styleClass="module-meta" />
+                                                        <Label text="Critical Case Oversight" styleClass="module-meta" />
                                                         <Button mnemonicParsing="false" onAction="#openEscalatedReview" text="Open Module" styleClass="module-button module-button-primary" />
                                                     </children>
                                                     <padding>

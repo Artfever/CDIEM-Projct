@@ -156,9 +156,13 @@ public final class AppNavigator {
         }
 
         Scene scene = new Scene(root, width, height);
-        scene.getStylesheets().setAll(
-                CaseManagementApplication.class.getResource(stylesheetPath).toExternalForm()
-        );
+        String pageStylesheet = CaseManagementApplication.class.getResource(stylesheetPath).toExternalForm();
+        String themeStylesheet = CaseManagementApplication.class.getResource("/view/theme.css").toExternalForm();
+        if (pageStylesheet.equals(themeStylesheet)) {
+            scene.getStylesheets().setAll(themeStylesheet);
+        } else {
+            scene.getStylesheets().setAll(pageStylesheet, themeStylesheet);
+        }
 
         primaryStage.setTitle(title);
         primaryStage.setScene(scene);
