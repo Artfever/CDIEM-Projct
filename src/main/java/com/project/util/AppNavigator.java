@@ -6,6 +6,7 @@ import com.project.controller.ManageCaseClosureController;
 import com.project.controller.CaseStateTransitionController;
 import com.project.controller.DashboardController;
 import com.project.controller.EvidenceController;
+import com.project.controller.LoginController;
 import com.project.controller.LogViewerController;
 import com.project.controller.NotificationController;
 import com.project.controller.ReportController;
@@ -32,6 +33,19 @@ public final class AppNavigator {
     public static void showLogin() {
         Parent root = loadRoot("/view/login.fxml");
         showScene(root, "/view/login.css", "CDIEM | Login", 520, 660, 440, 600);
+    }
+
+    public static void showLoginSuccess(String message) {
+        FXMLLoader loader = newLoader("/view/login.fxml");
+        Parent root = load(loader);
+        LoginController controller = loader.getController();
+        controller.showSuccessStatus(message);
+        showScene(root, "/view/login.css", "CDIEM | Login", 520, 660, 440, 600);
+    }
+
+    public static void showSignUp() {
+        Parent root = loadRoot("/view/signup.fxml");
+        showScene(root, "/view/login.css", "CDIEM | Sign Up", 560, 820, 500, 720);
     }
 
     public static void showDashboard(User currentUser) {

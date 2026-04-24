@@ -18,3 +18,7 @@ BEGIN
         ON dbo.AuditLogs (CaseID, [Timestamp] DESC, LogID DESC);
 END
 GO
+
+
+SELECT * FROM Cases;
+SELECT * FROM Evidence;

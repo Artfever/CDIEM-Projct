@@ -23,6 +23,21 @@ public class UserRepositoryImpl implements UserRepository {
             WHERE (LOWER(Username) = LOWER(?) OR LOWER(Email) = LOWER(?))
               AND PasswordHash = ?
             """;
+    private static final String USERNAME_EXISTS_SQL = """
+            SELECT TOP 1 1
+            FROM Users
+            WHERE LOWER(Username) = LOWER(?)
+            """;
+    private static final String EMAIL_EXISTS_SQL = """
+            SELECT TOP 1 1
+            FROM Users
+            WHERE LOWER(Email) = LOWER(?)
+            """;
+    private static final String CREATE_USER_SQL = """
+            INSERT INTO Users (Name, Username, Email, PasswordHash, Role)
+            OUTPUT INSERTED.UserID AS UserID
+            VALUES (?, ?, ?, ?, ?)
+            """;
     private static final String FIND_BY_ROLE_SQL = """
             SELECT UserID, Name, Username, Email, Role
             FROM Users
@@ -72,6 +87,36 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public boolean usernameExists(Connection connection, String username) throws SQLException {
+        return exists(connection, USERNAME_EXISTS_SQL, username);
+    }
+
+    @Override
+    public boolean emailExists(Connection connection, String email) throws SQLException {
+        return exists(connection, EMAIL_EXISTS_SQL, email);
+    }
+
+    @Override
+    public User create(Connection connection, String name, String username, String email,
+                       String passwordHash, UserRole role) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(CREATE_USER_SQL)) {
+            statement.setString(1, name);
+            statement.setString(2, username);
+            statement.setString(3, email);
+            statement.setString(4, passwordHash);
+            statement.setString(5, role.name());
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    throw new SQLException("Failed to retrieve the generated UserID.");
+                }
+
+                return new User(resultSet.getInt("UserID"), name, username, email, role);
+            }
+        }
+    }
+
+    @Override
     public List<User> findByRole(Connection connection, UserRole role) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(FIND_BY_ROLE_SQL)) {
             statement.setString(1, role.name());
@@ -86,6 +131,16 @@ public class UserRepositoryImpl implements UserRepository {
         try (PreparedStatement statement = connection.prepareStatement(FIND_CASE_ACTORS_SQL);
              ResultSet resultSet = statement.executeQuery()) {
             return mapUsers(resultSet);
+        }
+    }
+
+    private boolean exists(Connection connection, String sql, String value) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, value);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
         }
     }
 

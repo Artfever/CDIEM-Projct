@@ -39,3 +39,5 @@ BEGIN
         ON dbo.CaseClosureDecisions (CaseID, DecidedAt DESC, DecisionID DESC);
 END
 GO
+
+SELECT * FROM AuditLogs;

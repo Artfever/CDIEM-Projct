@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.6"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.project.controller.SignUpController"
+           styleClass="login-root">
+    <children>
+        <VBox alignment="CENTER_LEFT" maxWidth="520.0" prefWidth="520.0" spacing="18.0" styleClass="login-shell">
+            <children>
+                <VBox spacing="6.0">
+                    <children>
+                        <Label text="CDIEM" styleClass="login-tag" />
+                        <Label text="Create Account" styleClass="login-title" />
+                        <Label text="Fill in all fields to create your account." styleClass="login-subtitle" wrapText="true" />
+                    </children>
+                </VBox>
+
+                <VBox spacing="10.0">
+                    <children>
+                        <Label text="Full Name" styleClass="input-label" />
+                        <TextField fx:id="fullNameField" promptText="Enter your full name" styleClass="input-field" />
+
+                        <Label text="Username" styleClass="input-label" />
+                        <TextField fx:id="usernameField" promptText="Choose a username" styleClass="input-field" />
+
+                        <Label text="Email" styleClass="input-label" />
+                        <TextField fx:id="emailField" promptText="Enter your email address" styleClass="input-field" />
+
+                        <Label text="Password" styleClass="input-label" />
+                        <PasswordField fx:id="passwordField" promptText="Create a password" styleClass="input-field" />
+
+                        <Label text="Confirm Password" styleClass="input-label" />
+                        <PasswordField fx:id="confirmPasswordField" onAction="#register" promptText="Re-enter your password" styleClass="input-field" />
+
+                        <Label text="Role" styleClass="input-label" />
+                        <ComboBox fx:id="roleBox" promptText="Select a role" styleClass="input-field" visibleRowCount="3" />
+                    </children>
+                </VBox>
+
+                <HBox spacing="12.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#register" text="Register" styleClass="login-button" />
+                        <Button mnemonicParsing="false" onAction="#backToLogin" text="Back to Login" styleClass="secondary-button" />
+                    </children>
+                </HBox>
+
+                <Label fx:id="statusLabel" text="Ready." wrapText="true" styleClass="status-banner status-neutral" />
+            </children>
+            <padding>
+                <Insets bottom="32.0" left="32.0" right="32.0" top="32.0" />
+            </padding>
+        </VBox>
+    </children>
+</StackPane>

@@ -76,6 +76,91 @@
     -fx-background-color: linear-gradient(to right, #df9d67 0%, #c1764a 100%);
 }
 
+.secondary-button {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-background-radius: 999px;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 999px;
+    -fx-text-fill: #e3edf1;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 13px 20px 13px 20px;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+}
+
+.nav-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #98acb5;
+}
+
+.nav-link {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffcfaa;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.nav-link:hover,
+.nav-link:visited {
+    -fx-text-fill: #ffe2c8;
+}
+
+.combo-box.input-field {
+    -fx-background-color: #0d141a;
+    -fx-background-radius: 16px;
+    -fx-border-color: #253440;
+    -fx-border-radius: 16px;
+    -fx-padding: 2px 4px 2px 4px;
+}
+
+.combo-box.input-field:focused {
+    -fx-background-color: #121c23;
+    -fx-border-color: #d38d56;
+    -fx-effect: dropshadow(gaussian, rgba(211, 141, 86, 0.18), 10, 0.10, 0, 0);
+}
+
+.combo-box.input-field > .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #edf5f8;
+    -fx-font-size: 13px;
+    -fx-padding: 10px 12px 10px 12px;
+}
+
+.combo-box.input-field > .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box.input-field > .arrow-button > .arrow {
+    -fx-background-color: #d7a86e;
+}
+
+.combo-box-popup > .list-view {
+    -fx-background-color: #121c23;
+    -fx-background-insets: 0;
+    -fx-background-radius: 16px;
+    -fx-border-color: #253440;
+    -fx-border-radius: 16px;
+}
+
+.combo-box-popup > .list-view .list-cell {
+    -fx-background-color: #121c23;
+    -fx-text-fill: #edf5f8;
+    -fx-padding: 10px 12px 10px 12px;
+}
+
+.combo-box-popup > .list-view .list-cell:hover,
+.combo-box-popup > .list-view .list-cell:selected {
+    -fx-background-color: #1a2830;
+}
+
 .credential-card {
     -fx-background-color: linear-gradient(to bottom right, rgba(18, 27, 33, 0.94), rgba(16, 24, 29, 0.98));
     -fx-background-radius: 18px;

@@ -12,6 +12,7 @@ public class LoginController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
     private static final String STATUS_ERROR = "status-error";
+    private static final String DEFAULT_STATUS_MESSAGE = "Enter your username/email and password.";
 
     @FXML
     private TextField identifierField;
@@ -26,7 +27,7 @@ public class LoginController {
 
     @FXML
     public void initialize() {
-        setStatus("Enter your username/email and password.", STATUS_NEUTRAL);
+        showNeutralStatus();
     }
 
     @FXML
@@ -38,6 +39,27 @@ public class LoginController {
         } catch (Exception e) {
             setStatus(getRootMessage(e), STATUS_ERROR);
         }
+    }
+
+    @FXML
+    public void showSignUp() {
+        try {
+            AppNavigator.showSignUp();
+        } catch (Exception e) {
+            showErrorStatus(getRootMessage(e));
+        }
+    }
+
+    public void showNeutralStatus() {
+        setStatus(DEFAULT_STATUS_MESSAGE, STATUS_NEUTRAL);
+    }
+
+    public void showSuccessStatus(String message) {
+        setStatus(message, STATUS_SUCCESS);
+    }
+
+    public void showErrorStatus(String message) {
+        setStatus(message, STATUS_ERROR);
     }
 
     private void setStatus(String message, String stateClass) {
