@@ -14,6 +14,10 @@ import com.project.service.NotificationService;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for moving a case from one officer to another.
+ * The change is logged and both officers are notified inside the same workflow.
+ */
 public class ReassignmentController extends AbstractCaseWorkflowController {
     private final ChainOfCustodyLog chainOfCustodyLog;
     private final NotificationService notificationService;
@@ -54,6 +58,7 @@ public class ReassignmentController extends AbstractCaseWorkflowController {
                     throw new IllegalArgumentException("This case is already assigned to Investigating Officer " + officerId + ".");
                 }
 
+                // The case changes hands here, so the audit trail and notifications are updated together.
                 chainOfCustodyLog.recordReassignment(connection, existingCase, previousOfficer, newOfficer, currentUser);
                 existingCase.updateAssignedOfficer(newOfficer.getUserId(), newOfficer.getName());
                 existingCase.moveToState(CaseState.CASE_REASSIGNED);

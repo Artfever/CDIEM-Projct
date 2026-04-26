@@ -19,6 +19,10 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Orchestrates evidence management operations.
+ * Coordinates upload, integrity verification, and status marking.
+ */
 public class EvidenceService {
     private final CaseRepository caseRepository;
     private final EvidenceRepository evidenceRepository;
@@ -36,6 +40,7 @@ public class EvidenceService {
         this.caseRepository = caseRepository;
         this.evidenceRepository = evidenceRepository;
 
+        // This service joins the four smaller evidence workflows into one module-facing API.
         AuditLogService auditLogService = new AuditLogService(auditRepository);
         ChainOfCustodyLog chainOfCustodyLog = new ChainOfCustodyLog(auditLogService);
         HashService hashService = new HashService();

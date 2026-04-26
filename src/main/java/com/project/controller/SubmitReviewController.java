@@ -17,6 +17,10 @@ import javafx.scene.control.TextField;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Main screen for handing a verified case to the Supervisory Authority.
+ * Only the assigned investigating officer can complete this step.
+ */
 public class SubmitReviewController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -120,6 +124,7 @@ public class SubmitReviewController {
             ensureRole(UserRole.OFFICER, "Only an Investigating Officer can submit a case for supervisor review.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // Submission is the final officer action after verified evidence is ready.
             CaseSubmissionResult result = submissionService.submitForSupervisorReview(caseId, currentUser.getUserId());
             currentSnapshot = submissionService.getSubmissionSnapshot(caseId);
             renderSnapshot(currentSnapshot);

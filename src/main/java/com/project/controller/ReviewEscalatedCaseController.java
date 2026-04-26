@@ -20,6 +20,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Main screen for breached high-priority cases.
+ * Supervisors review escalated cases here and record corrective instructions.
+ */
 public class ReviewEscalatedCaseController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -141,6 +145,7 @@ public class ReviewEscalatedCaseController {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can review escalated cases.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // This step turns an escalated warning into an active supervisor-led response.
             EscalatedCaseReviewResult result = escalatedCaseReviewService.recordReviewDecision(
                     caseId,
                     instructionsArea.getText(),

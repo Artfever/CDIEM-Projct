@@ -1,5 +1,9 @@
 package com.project.model;
 
+/**
+ * Represents a user in the system (Investigating Officer, Analyst, or Supervisor).
+ * Contains basic identity information and role-based access control.
+ */
 public class User {
     private final int userId;
     private final String name;

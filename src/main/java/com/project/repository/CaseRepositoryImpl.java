@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of CaseRepository using SQL Server.
+ * Handles case persistence, state transitions, and summary report queries.
+ */
 public class CaseRepositoryImpl implements CaseRepository {
     private static final String INSERT_SQL = """
             INSERT INTO Cases (Title, Description, RelatedInfo, Severity, SlaHours, PriorityState, Status, AssignedOfficerID, AssignedOfficerName)
@@ -43,6 +47,10 @@ public class CaseRepositoryImpl implements CaseRepository {
     private static final String UPDATE_STATE_SQL = """
             UPDATE Cases
             SET Status = ?, ClosedAt = ?
+            WHERE CaseID = ?
+            """;
+    private static final String DELETE_SQL = """
+            DELETE FROM Cases
             WHERE CaseID = ?
             """;
     private static final String FIND_BY_ID_SQL = """
@@ -157,6 +165,17 @@ public class CaseRepositoryImpl implements CaseRepository {
             }
             statement.setInt(3, caseId);
             statement.executeUpdate();
+        }
+    }
+
+    @Override
+    public void deleteById(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_SQL)) {
+            statement.setInt(1, caseId);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Case delete completed without affecting a record.");
+            }
         }
     }
 

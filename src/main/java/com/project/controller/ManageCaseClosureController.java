@@ -22,6 +22,10 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Main screen for the closure decision stage.
+ * Supervisors either close an eligible case or return it for more forensic work.
+ */
 public class ManageCaseClosureController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -153,6 +157,7 @@ public class ManageCaseClosureController {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can approve case closure.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // Approval is the clean finish: verified evidence, supervisor sign-off, then the case closes.
             CaseClosureApprovalResult result = closureService.approveClosure(caseId, currentUser.getUserId());
             currentSnapshot = closureService.getClosureSnapshot(caseId);
             renderSnapshot(currentSnapshot);
@@ -170,6 +175,7 @@ public class ManageCaseClosureController {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can reject case closure.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // Rejection sends the case back for more investigation instead of ending it.
             CaseClosureRejectionResult result = closureService.rejectClosure(
                     caseId,
                     rejectionReasonArea.getText(),
@@ -214,6 +220,7 @@ public class ManageCaseClosureController {
     }
 
     private void renderSnapshot(CaseClosureSnapshot snapshot) {
+        // The closure screen always shows the latest case state, evidence state, and the last closure decision together.
         caseStatusValueLabel.setText(formatCaseState(snapshot.caseRecord().getStatus()));
         assignedOfficerValueLabel.setText(defaultText(snapshot.caseRecord().getAssignedOfficerName(), "Unassigned"));
         severityValueLabel.setText(formatEnumName(snapshot.caseRecord().getSeverity() == null

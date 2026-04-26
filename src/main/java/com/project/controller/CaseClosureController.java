@@ -23,6 +23,10 @@ import com.project.service.NotificationService;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for approving case closure.
+ * It marks the case closed, stores the decision, and informs the assigned officer.
+ */
 public class CaseClosureController extends AbstractCaseWorkflowController {
     private final EvidenceRepository evidenceRepository;
     private final CaseClosureDecisionRepository closureDecisionRepository;
@@ -63,6 +67,7 @@ public class CaseClosureController extends AbstractCaseWorkflowController {
                         ? null
                         : requireUser(connection, existingCase.getAssignedOfficerId());
 
+                // Approval updates the case itself and also records the supervisor's decision trail.
                 var previousState = existingCase.getStatus();
                 existingCase.closeCase();
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());

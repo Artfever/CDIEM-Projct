@@ -1,5 +1,9 @@
 package com.project.util;
 
+/**
+ * Generates unique IDs for cases.
+ * Uses the database-generated ID as the source of truth.
+ */
 public class IdGenerator {
     public int generateUniqueCaseID(int persistedCaseId) {
         if (persistedCaseId <= 0) {

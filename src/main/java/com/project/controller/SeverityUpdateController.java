@@ -14,6 +14,10 @@ import com.project.service.SLAManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for supervisor severity changes.
+ * A severity change also refreshes the case's SLA deadline and priority state.
+ */
 public class SeverityUpdateController extends AbstractCaseWorkflowController {
     private final ChainOfCustodyLog chainOfCustodyLog;
     private final SLAManager slaManager;
@@ -54,6 +58,7 @@ public class SeverityUpdateController extends AbstractCaseWorkflowController {
                     throw new IllegalArgumentException("Case is already marked with severity " + severityLevel.name() + ".");
                 }
 
+                // Severity is more than a label here; it directly drives urgency and response time.
                 int recalculatedSlaHours = slaManager.reEvaluateThreshold(severityLevel);
                 PriorityState recalculatedPriorityState = slaManager.transitionPriorityState(severityLevel);
                 chainOfCustodyLog.recordSeverityChange(

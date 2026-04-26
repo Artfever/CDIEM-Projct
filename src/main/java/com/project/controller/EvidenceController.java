@@ -24,6 +24,10 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Main screen for the Manage Evidence use case.
+ * Officers upload evidence here, and analysts review that evidence for integrity.
+ */
 public class EvidenceController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -143,6 +147,7 @@ public class EvidenceController {
     @FXML
     public void loadEvidenceSnapshot() {
         try {
+            // The screen always works from the latest saved evidence so the next action matches the current case state.
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
             refreshSnapshot(caseId);
             setStatus("Latest evidence snapshot loaded.", STATUS_NEUTRAL);
@@ -180,6 +185,7 @@ public class EvidenceController {
                 throw new IllegalArgumentException("An evidence file must be selected.");
             }
 
+            // Upload stores the file, hashes it, and moves the case into evidence intake.
             EvidenceUploadResult result = evidenceService.uploadEvidence(caseId, selectedFilePath, currentUser.getUserId());
             refreshSnapshot(caseId);
             selectedFilePath = null;
@@ -197,6 +203,7 @@ public class EvidenceController {
             ensureRole(UserRole.ANALYST, "Only a Digital Forensic Analyst can verify integrity.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // Verification recalculates the hash so the analyst can compare the live file with the recorded one.
             IntegrityVerificationResult result = evidenceService.verifyIntegrity(caseId, currentUser.getUserId());
             refreshSnapshot(caseId);
             setStatus(buildVerificationStatus(result), result.matched() ? STATUS_SUCCESS : STATUS_ERROR);
@@ -211,6 +218,7 @@ public class EvidenceController {
             ensureRole(UserRole.ANALYST, "Only a Digital Forensic Analyst can mark evidence as verified.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // A verified decision keeps the case moving forward toward supervisor review.
             EvidenceDecisionResult result = evidenceService.markEvidenceVerified(caseId, currentUser.getUserId());
             refreshSnapshot(caseId);
             setStatus(buildDecisionStatus("verified", result), STATUS_SUCCESS);
@@ -225,6 +233,7 @@ public class EvidenceController {
             ensureRole(UserRole.ANALYST, "Only a Digital Forensic Analyst can mark evidence as tampered.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // A tampered decision stops the normal flow and freezes the case for controlled handling.
             EvidenceDecisionResult result = evidenceService.markEvidenceTampered(caseId, currentUser.getUserId());
             refreshSnapshot(caseId);
             setStatus(buildDecisionStatus("tampered", result), STATUS_SUCCESS);

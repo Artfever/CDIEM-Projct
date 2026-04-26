@@ -17,6 +17,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction workflow for reviewing an escalated case.
+ * It stores the supervisor's instructions and marks the case as under active review.
+ */
 public class EscalatedCaseController extends AbstractCaseWorkflowController {
     private static final int MAX_INSTRUCTION_LENGTH = 500;
 
@@ -50,6 +54,7 @@ public class EscalatedCaseController extends AbstractCaseWorkflowController {
                 Case existingCase = requireCase(connection, caseId);
                 existingCase.validateEscalatedReviewState(LocalDateTime.now());
 
+                // Once reviewed, the case stays urgent but moves from passive escalation to active handling.
                 PriorityState previousPriorityState = existingCase.getPriorityState();
                 chainOfCustodyLog.recordEscalatedReview(connection, existingCase, currentUser, cleanedInstructions);
                 existingCase.transitionPriorityState(PriorityState.UNDER_ACTIVE_REVIEW);

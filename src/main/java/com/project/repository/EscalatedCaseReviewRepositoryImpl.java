@@ -11,10 +11,18 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Optional;
 
+/**
+ * Implementation of EscalatedCaseReviewRepository using SQL Server.
+ * Handles storing supervisor review decisions on escalated cases.
+ */
 public class EscalatedCaseReviewRepositoryImpl implements EscalatedCaseReviewRepository {
     private static final String INSERT_SQL = """
             INSERT INTO EscalatedCaseReviews (CaseID, Instructions, PreviousPriorityState, ResultingPriorityState, ReviewedByUserID)
             VALUES (?, ?, ?, ?, ?)
+            """;
+    private static final String DELETE_BY_CASE_ID_SQL = """
+            DELETE FROM EscalatedCaseReviews
+            WHERE CaseID = ?
             """;
     private static final String FIND_LATEST_BY_CASE_ID_SQL = """
             SELECT TOP (1)
@@ -52,6 +60,14 @@ public class EscalatedCaseReviewRepositoryImpl implements EscalatedCaseReviewRep
         }
 
         throw new SQLException("Escalated case review insert completed without returning a generated ReviewID.");
+    }
+
+    @Override
+    public void deleteByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_BY_CASE_ID_SQL)) {
+            statement.setInt(1, caseId);
+            statement.executeUpdate();
+        }
     }
 
     @Override

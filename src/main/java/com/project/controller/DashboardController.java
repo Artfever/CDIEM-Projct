@@ -7,6 +7,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+/**
+ * Landing screen after login.
+ * Shows only the modules the signed-in user is allowed to open.
+ */
 public class DashboardController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_ERROR = "status-error";
@@ -156,6 +160,7 @@ public class DashboardController {
             return;
         }
 
+        // The dashboard doubles as the app map: it introduces the user and hides modules outside their role.
         welcomeLabel.setText("Welcome, " + currentUser.getName());
         roleLabel.setText(currentUser.getRole().getDisplayName());
         identityLabel.setText(buildIdentityLine(currentUser));

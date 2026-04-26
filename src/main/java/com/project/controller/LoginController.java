@@ -8,6 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+/**
+ * Entry screen for the application.
+ * Signs a user in, then hands them off to the role-aware dashboard.
+ */
 public class LoginController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -33,6 +37,7 @@ public class LoginController {
     @FXML
     public void login() {
         try {
+            // Successful login does two things: prove identity and carry the user into the rest of the workflow.
             User authenticatedUser = authService.authenticate(identifierField.getText(), passwordField.getText());
             setStatus("Authentication successful.", STATUS_SUCCESS);
             AppNavigator.showDashboard(authenticatedUser);

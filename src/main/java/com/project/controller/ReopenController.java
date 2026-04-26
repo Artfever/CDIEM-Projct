@@ -15,6 +15,10 @@ import com.project.service.NotificationService;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for reopening a frozen case.
+ * The supervisor records a reason, restores the case, and notifies the relevant users.
+ */
 public class ReopenController extends AbstractCaseWorkflowController {
     private static final int MAX_REASON_LENGTH = 320;
 
@@ -59,6 +63,7 @@ public class ReopenController extends AbstractCaseWorkflowController {
                         })
                         .orElse(null);
 
+                // Reopening reverses the freeze and tells both the officer and the last analyst what changed.
                 chainOfCustodyLog.recordReopen(connection, existingCase, currentUser, cleanedReason);
                 existingCase.reopenToSupervisorReview();
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());

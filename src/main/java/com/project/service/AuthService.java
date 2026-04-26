@@ -9,6 +9,10 @@ import com.project.util.PasswordUtil;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Handles user authentication.
+ * Validates credentials and returns the authenticated user.
+ */
 public class AuthService {
     private final UserRepository userRepository;
 
@@ -33,6 +37,7 @@ public class AuthService {
         }
 
         try (Connection connection = DBConnection.getConnection()) {
+            // Login accepts either username or email, then compares the stored password hash.
             return userRepository.authenticate(connection, cleanedIdentifier, PasswordUtil.sha256(cleanedPassword))
                     .orElseThrow(() -> new IllegalArgumentException("Invalid username/email or password."));
         } catch (SQLException e) {

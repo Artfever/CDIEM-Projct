@@ -18,6 +18,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction workflow for confirming evidence as trustworthy.
+ * The analyst finalizes the evidence as verified but leaves the case in forensic review.
+ */
 public class VerificationMarkController extends AbstractCaseWorkflowController {
     private final EvidenceRepository evidenceRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
@@ -47,6 +51,7 @@ public class VerificationMarkController extends AbstractCaseWorkflowController {
                 Evidence evidence = requireEvidence(connection, caseId);
                 validateVerificationReady(evidence);
 
+                // Verified evidence is finalized here so the assigned officer can later submit the case upward.
                 LocalDateTime decisionTime = LocalDateTime.now();
                 evidence.markStatus(EvidenceStatus.VERIFIED);
                 evidence.recordVerification(evidence.getRecalculatedSha256(), currentUser.getUserId(), decisionTime);

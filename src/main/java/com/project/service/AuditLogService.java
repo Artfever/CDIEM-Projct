@@ -26,6 +26,10 @@ public final class AuditLogService {
         auditRepository.logAction(connection, caseId, action, userId);
     }
 
+    public void deleteAuditTrailByCaseId(Connection connection, int caseId) throws SQLException {
+        auditRepository.deleteByCaseId(connection, caseId);
+    }
+
     public List<AuditLog> getAuditTrailByCaseId(Connection connection, int caseId) throws SQLException {
         return auditRepository.findByCaseId(connection, caseId);
     }

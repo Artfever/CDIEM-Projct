@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents digital evidence associated with a case.
+ * Tracks file info, hash for integrity verification, and verification history.
+ */
 public class Evidence {
     private Integer evidenceId;
     private Integer caseId;

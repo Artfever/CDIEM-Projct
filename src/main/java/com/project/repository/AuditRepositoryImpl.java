@@ -12,10 +12,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+/**
+ * Implementation of AuditRepository using SQL Server.
+ * Handles logging case actions and retrieving audit history.
+ */
 public class AuditRepositoryImpl implements AuditRepository {
     private static final String INSERT_AUDIT_SQL = """
             INSERT INTO AuditLogs (CaseID, Action, PerformedBy)
             VALUES (?, ?, ?)
+            """;
+    private static final String DELETE_BY_CASE_ID_SQL = """
+            DELETE FROM AuditLogs
+            WHERE CaseID = ?
             """;
     private static final String FIND_BY_CASE_ID_SQL = """
             SELECT a.LogID, a.CaseID, a.Action, a.PerformedBy, a.[Timestamp], u.Name AS PerformedByName
@@ -37,6 +45,14 @@ public class AuditRepositoryImpl implements AuditRepository {
 
             statement.setString(2, action);
             statement.setInt(3, userId);
+            statement.executeUpdate();
+        }
+    }
+
+    @Override
+    public void deleteByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_BY_CASE_ID_SQL)) {
+            statement.setInt(1, caseId);
             statement.executeUpdate();
         }
     }

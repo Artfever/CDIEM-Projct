@@ -35,6 +35,7 @@ public class CaseStateTransitionService {
         this.caseRepository = caseRepository;
         this.evidenceRepository = evidenceRepository;
 
+        // This module exposes just two workflow actions: freeze and reopen.
         AuditLogService auditLogService = new AuditLogService(auditRepository);
         ChainOfCustodyLog chainOfCustodyLog = new ChainOfCustodyLog(auditLogService);
         NotificationService notificationService = new NotificationService(notificationRepository);

@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Records a supervisor's decision on a case closure request.
+ * Tracks the decision type, reason, and state transitions.
+ */
 public class CaseClosureDecision {
     private final int decisionId;
     private final int caseId;

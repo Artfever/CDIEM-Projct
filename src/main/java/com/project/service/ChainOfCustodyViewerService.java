@@ -11,6 +11,10 @@ import com.project.util.DBConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Read-only service behind the chain-of-custody screen.
+ * It returns the case together with its full audit history and inspection mode flag.
+ */
 public class ChainOfCustodyViewerService {
     private final CaseRepository caseRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
@@ -28,6 +32,7 @@ public class ChainOfCustodyViewerService {
         try (Connection connection = DBConnection.getConnection()) {
             Case caseRecord = caseRepository.findById(connection, caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case " + caseId + " does not exist."));
+            // Frozen cases are highlighted so supervisors know they are looking at a paused workflow.
             return new ChainOfCustodySnapshot(
                     caseRecord,
                     chainOfCustodyLog.retrieveImmutableEntries(connection, caseId),

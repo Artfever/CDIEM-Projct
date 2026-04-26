@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a notification sent to a user about case events.
+ * Tracks who sent it, who received it, the message, and delivery channel.
+ */
 public class NotificationRecord {
     private final int notificationId;
     private final Integer caseId;

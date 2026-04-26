@@ -4,6 +4,7 @@ import com.project.model.Case;
 import com.project.model.SeverityLevel;
 import com.project.model.User;
 import com.project.model.UserRole;
+import com.project.service.CaseDeletionResult;
 import com.project.service.CaseReassignmentResult;
 import com.project.service.CaseService;
 import com.project.service.CaseSeverityUpdateResult;
@@ -16,6 +17,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+/**
+ * Main screen for the Manage Case use case.
+ * Officers create cases here, while supervisors adjust, reassign, or delete them.
+ */
 public class CaseController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -63,6 +68,9 @@ public class CaseController {
     @FXML
     private Button reassignOfficerButton;
 
+    @FXML
+    private Button deleteCaseButton;
+
     private final CaseService caseService = new CaseService();
     private final CaseRegistrationController caseRegistrationController = new CaseRegistrationController();
     private final SeverityUpdateController severityUpdateController = new SeverityUpdateController();
@@ -87,6 +95,7 @@ public class CaseController {
     @FXML
     public void registerCase() {
         try {
+            // This path is the starting point of a case: collect the story, store it, and return the new case ID.
             Case c = new Case(
                     clean(titleField.getText()),
                     clean(descriptionArea.getText()),
@@ -109,6 +118,7 @@ public class CaseController {
     @FXML
     public void updateSeverity() {
         try {
+            // Supervisors can change severity later, which also changes the case priority and SLA target.
             CaseSeverityUpdateResult result = severityUpdateController.updateSeverity(
                     parseRequiredInteger(caseIdField.getText(), "Case ID"),
                     parseSeverity(),
@@ -123,12 +133,29 @@ public class CaseController {
     @FXML
     public void reassignOfficer() {
         try {
+            // Reassignment changes case ownership and lets both the old and new officers know what happened.
             CaseReassignmentResult result = reassignmentController.reassignTo(
                     parseRequiredInteger(caseIdField.getText(), "Case ID"),
                     requireSelectedUser(assignedOfficerBox, "Assigned Investigating Officer").getUserId(),
                     requireSelectedUser(currentUserBox, "Acting User").getUserId()
             );
             setStatus(buildReassignmentStatus(result), STATUS_SUCCESS);
+        } catch (Exception e) {
+            setStatus(getRootMessage(e), STATUS_ERROR);
+        }
+    }
+
+    @FXML
+    public void deleteCase() {
+        try {
+            // Delete is a supervisor-only end-of-line action that removes the case from workflow entirely.
+            CaseDeletionResult result = caseService.deleteCase(
+                    parseRequiredInteger(caseIdField.getText(), "Case ID"),
+                    requireSelectedUser(currentUserBox, "Acting User").getUserId()
+            );
+            caseIdField.clear();
+            assignedOfficerBox.getSelectionModel().clearSelection();
+            setStatus(buildDeletionStatus(result), STATUS_SUCCESS);
         } catch (Exception e) {
             setStatus(getRootMessage(e), STATUS_ERROR);
         }
@@ -185,9 +212,11 @@ public class CaseController {
         boolean supervisorSignedIn = currentUser.getRole() == UserRole.SUPERVISOR;
         boolean showNarrativeFields = !supervisorSignedIn;
 
+        // One screen serves two audiences, so the visible actions change with the signed-in role.
         setNodeVisibility(registerCaseButton, officerSignedIn);
         setNodeVisibility(updateSeverityButton, supervisorSignedIn);
         setNodeVisibility(reassignOfficerButton, supervisorSignedIn);
+        setNodeVisibility(deleteCaseButton, supervisorSignedIn);
         setNodeVisibility(descriptionLabel, showNarrativeFields);
         setNodeVisibility(descriptionArea, showNarrativeFields);
         setNodeVisibility(relatedInfoLabel, showNarrativeFields);
@@ -207,7 +236,8 @@ public class CaseController {
         if (officerSignedIn) {
             setStatus("Signed in as Investigating Officer. Registration actions are available.", STATUS_NEUTRAL);
         } else if (supervisorSignedIn) {
-            setStatus("Signed in as Supervisory Authority. Severity updates and reassignment are available.", STATUS_NEUTRAL);
+            setStatus("Signed in as Supervisory Authority. Severity updates, reassignment, and deletion are available.",
+                    STATUS_NEUTRAL);
         }
     }
 
@@ -255,6 +285,36 @@ public class CaseController {
                 + ". Outgoing and incoming officers notified, and case state moved to CASE_REASSIGNED.";
     }
 
+    private String buildDeletionStatus(CaseDeletionResult result) {
+        StringBuilder status = new StringBuilder("Case ")
+                .append(result.caseId())
+                .append(" was deleted from ")
+                .append(formatEnumName(result.previousState().name()))
+                .append('.');
+
+        if (result.relatedUserName() == null) {
+            status.append(" No related user was available for notification.");
+        } else if (result.relatedUserNotified()) {
+            status.append(' ').append(result.relatedUserName()).append(" was notified.");
+        } else {
+            status.append(" Notification to ").append(result.relatedUserName()).append(" could not be confirmed.");
+        }
+
+        if (result.retainedEvidenceFileCount() > 0) {
+            status.append(' ')
+                    .append(result.deletedEvidenceFileCount())
+                    .append(" stored evidence file(s) were removed, but ")
+                    .append(result.retainedEvidenceFileCount())
+                    .append(" file(s) require manual secure-storage cleanup.");
+        } else if (result.deletedEvidenceFileCount() > 0) {
+            status.append(' ')
+                    .append(result.deletedEvidenceFileCount())
+                    .append(" stored evidence file(s) were removed from secure storage.");
+        }
+
+        return status.toString();
+    }
+
     private User requireSelectedUser(ComboBox<User> comboBox, String fieldName) {
         User selectedUser = comboBox.getValue();
         if (selectedUser == null) {
@@ -291,6 +351,30 @@ public class CaseController {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(fieldName + " must be a number.");
         }
+    }
+
+    private String formatEnumName(String value) {
+        if (value == null || value.isBlank()) {
+            return "Unavailable";
+        }
+
+        String[] tokens = value.toLowerCase().split("_");
+        StringBuilder builder = new StringBuilder();
+        for (String token : tokens) {
+            if (token.isBlank()) {
+                continue;
+            }
+
+            if (builder.length() > 0) {
+                builder.append(' ');
+            }
+
+            builder.append(Character.toUpperCase(token.charAt(0)));
+            if (token.length() > 1) {
+                builder.append(token.substring(1));
+            }
+        }
+        return builder.toString();
     }
 
     private String clean(String value) {

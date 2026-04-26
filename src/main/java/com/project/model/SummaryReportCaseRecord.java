@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * A single case record in a summary report.
+ * Includes case details, SLA status, and evidence status for reporting.
+ */
 public record SummaryReportCaseRecord(int caseId, String title, CaseState caseState, SeverityLevel severity,
                                       PriorityState priorityState, String assignedOfficerName, LocalDateTime createdAt,
                                       LocalDateTime closedAt, Integer slaHours, EvidenceStatus latestEvidenceStatus) {

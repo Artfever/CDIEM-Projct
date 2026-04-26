@@ -7,8 +7,14 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Data access operations for AuditLog entities.
+ * Handles logging and retrieving audit trail entries.
+ */
 public interface AuditRepository {
     void logAction(Connection connection, Integer caseId, String action, int userId) throws SQLException;
+
+    void deleteByCaseId(Connection connection, int caseId) throws SQLException;
 
     List<AuditLog> findByCaseId(Connection connection, int caseId) throws SQLException;
 

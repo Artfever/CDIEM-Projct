@@ -13,6 +13,10 @@ import com.project.service.ChainOfCustodyLog;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for freezing a case.
+ * Freezing preserves the case but stops normal work on it until a supervisor reopens it.
+ */
 public class CaseFreezeController extends AbstractCaseWorkflowController {
     private final ChainOfCustodyLog chainOfCustodyLog;
 
@@ -38,6 +42,7 @@ public class CaseFreezeController extends AbstractCaseWorkflowController {
                 Case existingCase = requireCase(connection, caseId);
                 existingCase.validateFreezableState();
 
+                // The audit record is written before the state change so the pause is traceable.
                 chainOfCustodyLog.recordFreeze(connection, existingCase, currentUser);
                 existingCase.triggerFreezeWorkflow();
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());

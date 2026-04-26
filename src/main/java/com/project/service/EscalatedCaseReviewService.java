@@ -17,6 +17,10 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+/**
+ * Service for the escalated-case review module.
+ * It loads SLA-breach context and delegates the final review decision to the transaction controller.
+ */
 public class EscalatedCaseReviewService {
     private final CaseRepository caseRepository;
     private final EscalatedCaseReviewRepository escalatedCaseReviewRepository;
@@ -52,6 +56,7 @@ public class EscalatedCaseReviewService {
             Case caseRecord = caseRepository.findById(connection, caseId)
                     .orElseThrow(() -> new IllegalArgumentException("Case " + caseId + " does not exist."));
 
+            // The snapshot answers the key business question for this screen: has the case breached its SLA yet?
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime slaDueAt = caseRecord.getSlaDueAt();
             boolean slaBreached = caseRecord.hasBreachedSla(now);

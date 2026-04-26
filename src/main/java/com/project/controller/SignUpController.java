@@ -12,6 +12,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+/**
+ * Self-service account creation screen.
+ * Collects user details, creates the account, then returns the user to login.
+ */
 public class SignUpController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -51,6 +55,7 @@ public class SignUpController {
     @FXML
     public void register() {
         try {
+            // Registration stays on this screen until every required field is valid and the account is stored.
             signUpService.register(
                     fullNameField.getText(),
                     usernameField.getText(),

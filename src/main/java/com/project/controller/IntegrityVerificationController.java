@@ -19,6 +19,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction workflow for analyst integrity checks.
+ * It recalculates the evidence hash and records whether the stored and live values match.
+ */
 public class IntegrityVerificationController extends AbstractCaseWorkflowController {
     private final EvidenceRepository evidenceRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
@@ -51,6 +55,7 @@ public class IntegrityVerificationController extends AbstractCaseWorkflowControl
                 existingCase.validateEvidenceVerificationState();
                 Evidence evidence = requireEvidence(connection, caseId);
 
+                // The analyst compares what was stored earlier with what the file looks like right now.
                 String storedHash = hashService.retrieveStoredHash(evidence);
                 String recalculatedHash = hashService.recalculateHash(evidence);
                 boolean matched = hashService.compareHashes(storedHash, recalculatedHash);
@@ -65,6 +70,7 @@ public class IntegrityVerificationController extends AbstractCaseWorkflowControl
                         verifiedAt
                 );
 
+                // After the check, the case sits in forensic review until the analyst finalizes the outcome.
                 existingCase.moveToState(CaseState.FORENSIC_REVIEW);
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());
                 chainOfCustodyLog.recordIntegrityVerification(

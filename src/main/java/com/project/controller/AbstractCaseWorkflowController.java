@@ -12,6 +12,10 @@ import com.project.util.DBConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Shared workflow base for case-related use cases.
+ * It centralizes validation, user lookup, case lookup, and transaction helpers.
+ */
 abstract class AbstractCaseWorkflowController {
     private static final int MAX_TITLE_LENGTH = 255;
     private static final int MAX_DESCRIPTION_LENGTH = 1000;
@@ -31,6 +35,7 @@ abstract class AbstractCaseWorkflowController {
 
     protected Connection openConnection() throws SQLException {
         Connection connection = DBConnection.getConnection();
+        // Case workflows are transactional so a partial update does not leave the case in an inconsistent state.
         connection.setAutoCommit(false);
         return connection;
     }

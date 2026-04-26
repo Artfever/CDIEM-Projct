@@ -22,6 +22,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction workflow for evidence upload.
+ * It stores the file securely, records its hash, and moves the case into evidence intake.
+ */
 public class EvidenceUploadController extends AbstractCaseWorkflowController {
     private final EvidenceRepository evidenceRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
@@ -62,6 +66,7 @@ public class EvidenceUploadController extends AbstractCaseWorkflowController {
                 existingCase.validateEvidenceUploadState();
                 validateAssignedOfficerOwnership(existingCase, currentUser);
 
+                // The stored copy becomes the official evidence file used for later integrity checks.
                 storedFile = secureFileStorage.storeSecurely(sourceFile, caseId);
                 String hashValue = hashService.generateSHA256(storedFile);
                 Evidence evidence = new Evidence(
@@ -76,6 +81,7 @@ public class EvidenceUploadController extends AbstractCaseWorkflowController {
 
                 int evidenceId = evidenceRepository.save(connection, evidence);
                 chainOfCustodyLog.recordEvidenceUpload(connection, existingCase, evidence, currentUser);
+                // Once evidence is on record, the case leaves creation/reassignment and enters evidence intake.
                 existingCase.moveToState(CaseState.EVIDENCE_UPLOADED);
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());
 

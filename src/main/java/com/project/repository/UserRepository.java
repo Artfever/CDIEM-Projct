@@ -8,6 +8,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Data access operations for User entities.
+ * Handles user lookup, authentication, and registration.
+ */
 public interface UserRepository {
     Optional<User> findById(Connection connection, int userId) throws SQLException;
 

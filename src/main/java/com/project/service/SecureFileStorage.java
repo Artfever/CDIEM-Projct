@@ -40,13 +40,22 @@ public class SecureFileStorage {
     }
 
     public void deleteQuietly(Path storedFile) {
+        deleteStoredFile(storedFile);
+    }
+
+    public boolean deleteStoredFile(Path storedFile) {
         if (storedFile == null) {
-            return;
+            return true;
         }
 
         try {
-            Files.deleteIfExists(storedFile);
+            if (!Files.exists(storedFile)) {
+                return true;
+            }
+
+            return Files.deleteIfExists(storedFile);
         } catch (IOException ignored) {
+            return false;
         }
     }
 

@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Records audit trail of actions performed on cases.
+ * Tracks who did what and when for accountability.
+ */
 public class AuditLog {
     private final int logId;
     private final Integer caseId;

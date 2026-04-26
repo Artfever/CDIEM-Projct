@@ -10,10 +10,18 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implementation of NotificationRepository using SQL Server.
+ * Handles storing and retrieving user notifications.
+ */
 public class NotificationRepositoryImpl implements NotificationRepository {
     private static final String INSERT_NOTIFICATION_SQL = """
             INSERT INTO Notifications (CaseID, RecipientUserID, SentByUserID, Message, Channel)
             VALUES (?, ?, ?, ?, 'SYSTEM')
+            """;
+    private static final String DELETE_BY_CASE_ID_SQL = """
+            DELETE FROM Notifications
+            WHERE CaseID = ?
             """;
     private static final String FIND_BY_RECIPIENT_SQL = """
             SELECT n.NotificationID, n.CaseID, n.RecipientUserID, n.SentByUserID, n.Message, n.Channel, n.CreatedAt,
@@ -37,6 +45,14 @@ public class NotificationRepositoryImpl implements NotificationRepository {
             statement.setInt(2, recipientUserId);
             statement.setInt(3, sentByUserId);
             statement.setString(4, message);
+            statement.executeUpdate();
+        }
+    }
+
+    @Override
+    public void deleteByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_BY_CASE_ID_SQL)) {
+            statement.setInt(1, caseId);
             statement.executeUpdate();
         }
     }

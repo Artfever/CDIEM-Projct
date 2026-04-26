@@ -1,5 +1,9 @@
 package com.project.model;
 
+/**
+ * Case priority states for workflow management.
+ * Determines how urgent a case is and how it should be handled.
+ */
 public enum PriorityState {
     STANDARD("Standard"),
     PRIORITY("Priority"),

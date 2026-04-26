@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of UserRepository using SQL Server.
+ * Provides methods for user authentication, lookup, and creation.
+ */
 public class UserRepositoryImpl implements UserRepository {
     private static final String FIND_BY_ID_SQL = """
             SELECT UserID, Name, Username, Email, Role

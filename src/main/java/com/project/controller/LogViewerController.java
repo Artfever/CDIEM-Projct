@@ -20,6 +20,10 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Read-only screen for the chain-of-custody timeline.
+ * Supervisors use it to inspect what happened to a case without changing anything.
+ */
 public class LogViewerController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -107,6 +111,7 @@ public class LogViewerController {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can view chain-of-custody logs.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // This use case never edits data; it simply loads the saved audit trail for inspection.
             currentSnapshot = viewerService.getSnapshot(caseId);
             renderSnapshot(currentSnapshot);
             updateAvailability();

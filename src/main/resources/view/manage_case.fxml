@@ -28,7 +28,7 @@
                             <children>
                                 <Label text="CDIEM" styleClass="app-tag" />
                                 <Label text="Manage Case" styleClass="view-title" />
-                                <Label text="Register new cases, adjust severity, and reassign investigating ownership." styleClass="view-subtitle" wrapText="true" />
+                                <Label text="Register new cases, adjust severity, reassign investigating ownership, and delete cases." styleClass="view-subtitle" wrapText="true" />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
@@ -85,7 +85,7 @@
                                         <VBox spacing="4.0">
                                             <children>
                                                 <Label text="Action Context" styleClass="panel-title" />
-                                                <Label text="Select the acting user and provide the target case reference for supervisor actions." styleClass="panel-subtitle" wrapText="true" />
+                                                <Label text="Select the acting user and provide the target case reference for supervisor actions, including deletion." styleClass="panel-subtitle" wrapText="true" />
                                             </children>
                                         </VBox>
                                         <GridPane hgap="12.0" vgap="16.0">
@@ -107,7 +107,7 @@
                                         <VBox spacing="8.0" styleClass="context-card">
                                             <children>
                                                 <Label text="Permissions" styleClass="context-title" />
-                                                <Label text="Investigating Officers register new cases. Supervisory Authority users control severity updates and reassignment. Severity changes now recalculate SLA and priority, and reassignment outputs officer notifications." styleClass="context-text" wrapText="true" />
+                                                <Label text="Investigating Officers register new cases. Supervisory Authority users control severity updates, reassignment, and deletion at any case state. Severity changes recalculate SLA and priority, reassignment notifies officers, and deleting a case removes its database record while notifying the assigned investigating officer." styleClass="context-text" wrapText="true" />
                                             </children>
                                             <padding>
                                                 <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
@@ -128,6 +128,7 @@
                                         <Button fx:id="registerCaseButton" mnemonicParsing="false" onAction="#registerCase" text="Register Case" styleClass="action-button primary-action" />
                                         <Button fx:id="updateSeverityButton" mnemonicParsing="false" onAction="#updateSeverity" text="Update Severity" styleClass="action-button secondary-action" />
                                         <Button fx:id="reassignOfficerButton" mnemonicParsing="false" onAction="#reassignOfficer" text="Reassign Investigating Officer" styleClass="action-button secondary-action" />
+                                        <Button fx:id="deleteCaseButton" mnemonicParsing="false" onAction="#deleteCase" text="Delete Case" styleClass="action-button danger-action" />
                                     </children>
                                 </FlowPane>
                                 <Label fx:id="statusLabel" text="Ready." wrapText="true" styleClass="status-banner status-neutral" />

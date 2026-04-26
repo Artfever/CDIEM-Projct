@@ -98,6 +98,29 @@ public class NotificationService {
         return true;
     }
 
+    public void deleteCaseNotifications(Connection connection, int caseId) throws SQLException {
+        notificationRepository.deleteByCaseId(connection, caseId);
+    }
+
+    public boolean notifyInvestigatingOfficerOfCaseDeletion(Connection connection, int caseId, User assignedOfficer,
+                                                            User supervisoryAuthority) throws SQLException {
+        if (assignedOfficer == null) {
+            return false;
+        }
+
+        // The case link is left empty because the case record no longer exists after deletion.
+        notificationRepository.save(
+                connection,
+                null,
+                assignedOfficer.getUserId(),
+                supervisoryAuthority.getUserId(),
+                "Case " + caseId + " has been deleted from the system by "
+                        + supervisoryAuthority.getRole().getDisplayName() + " "
+                        + supervisoryAuthority.getName() + "."
+        );
+        return true;
+    }
+
     public int notifySupervisorsForReviewSubmission(Connection connection, int caseId, List<User> supervisors,
                                                     User investigatingOfficer) throws SQLException {
         if (supervisors == null || supervisors.isEmpty()) {

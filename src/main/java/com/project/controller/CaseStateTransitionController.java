@@ -20,6 +20,10 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Main screen for pause-and-resume workflow changes.
+ * Analysts freeze active cases here, and supervisors reopen frozen ones.
+ */
 public class CaseStateTransitionController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -123,6 +127,7 @@ public class CaseStateTransitionController {
     @FXML
     public void loadCaseSnapshot() {
         try {
+            // This view loads both the case state and the latest evidence state before showing allowed actions.
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
             currentSnapshot = transitionService.getTransitionSnapshot(caseId);
             renderSnapshot(currentSnapshot);
@@ -139,6 +144,7 @@ public class CaseStateTransitionController {
             ensureRole(UserRole.ANALYST, "Only a Digital Forensic Analyst can freeze a case.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // Freeze is the analyst's way to halt normal handling without deleting case history.
             CaseFreezeResult result = transitionService.freezeCase(caseId, currentUser.getUserId());
             currentSnapshot = transitionService.getTransitionSnapshot(caseId);
             renderSnapshot(currentSnapshot);
@@ -155,6 +161,7 @@ public class CaseStateTransitionController {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can reopen a case.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
+            // Reopen puts a frozen case back into supervised handling and alerts the people involved.
             CaseReopenResult result = transitionService.reopenCase(caseId, reopenReasonArea.getText(), currentUser.getUserId());
             currentSnapshot = transitionService.getTransitionSnapshot(caseId);
             renderSnapshot(currentSnapshot);

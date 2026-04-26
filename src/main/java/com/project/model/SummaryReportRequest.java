@@ -3,6 +3,10 @@ package com.project.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Request parameters for generating a summary report.
+ * Contains date range, case filter, and priority filter.
+ */
 public record SummaryReportRequest(LocalDate fromDate, LocalDate toDate, SummaryReportCaseFilter caseFilter,
                                    PriorityState priorityState) {
     public SummaryReportRequest {

@@ -12,10 +12,18 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Optional;
 
+/**
+ * Implementation of CaseClosureDecisionRepository using SQL Server.
+ * Handles storing supervisor closure decisions on cases.
+ */
 public class CaseClosureDecisionRepositoryImpl implements CaseClosureDecisionRepository {
     private static final String INSERT_SQL = """
             INSERT INTO CaseClosureDecisions (CaseID, DecisionType, Reason, PreviousState, ResultingState, DecidedByUserID)
             VALUES (?, ?, ?, ?, ?, ?)
+            """;
+    private static final String DELETE_BY_CASE_ID_SQL = """
+            DELETE FROM CaseClosureDecisions
+            WHERE CaseID = ?
             """;
     private static final String FIND_LATEST_BY_CASE_ID_SQL = """
             SELECT TOP (1)
@@ -62,6 +70,14 @@ public class CaseClosureDecisionRepositoryImpl implements CaseClosureDecisionRep
         }
 
         throw new SQLException("Case closure decision insert completed without returning a generated DecisionID.");
+    }
+
+    @Override
+    public void deleteByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_BY_CASE_ID_SQL)) {
+            statement.setInt(1, caseId);
+            statement.executeUpdate();
+        }
     }
 
     @Override

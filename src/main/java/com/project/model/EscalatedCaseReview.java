@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a supervisor's review of an escalated case.
+ * Tracks instructions given and priority state changes.
+ */
 public class EscalatedCaseReview {
     private final int reviewId;
     private final int caseId;

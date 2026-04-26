@@ -16,6 +16,10 @@ import com.project.service.ChainOfCustodyLog;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for rejecting closure.
+ * The supervisor records why the case is not ready and returns it to forensic review.
+ */
 public class RejectionController extends AbstractCaseWorkflowController {
     private static final int MAX_REASON_LENGTH = 320;
 
@@ -49,6 +53,7 @@ public class RejectionController extends AbstractCaseWorkflowController {
                 Case existingCase = requireCase(connection, caseId);
                 existingCase.validateSupervisorReviewState();
 
+                // A rejection preserves the case and sends it back one step instead of finishing it.
                 var previousState = existingCase.getStatus();
                 chainOfCustodyLog.recordClosureRejection(connection, existingCase, currentUser, cleanedReason);
                 existingCase.returnToForensicReview();

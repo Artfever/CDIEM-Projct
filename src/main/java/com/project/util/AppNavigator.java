@@ -20,6 +20,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Handles navigation between different screens (views) in the application.
+ * Loads FXML files and sets up the scene with appropriate dimensions and styles.
+ * Each method opens a specific screen and passes the current user context.
+ */
 public final class AppNavigator {
     private static Stage primaryStage;
 

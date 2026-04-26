@@ -32,6 +32,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Main screen for management reporting.
+ * Supervisors filter cases, review the summary, and export it as CSV or PDF.
+ */
 public class ReportController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_SUCCESS = "status-success";
@@ -157,6 +161,7 @@ public class ReportController {
         try {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can generate summary reports.");
 
+            // Report generation turns the chosen filters into one snapshot of the current case landscape.
             SummaryReportRequest request = new SummaryReportRequest(
                     fromDatePicker.getValue(),
                     toDatePicker.getValue(),
@@ -204,6 +209,7 @@ public class ReportController {
         try {
             ensureReportReadyForExport();
 
+            // Export reuses the report already on screen so the file matches what the user is seeing.
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Export Summary Report as CSV");
             chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
@@ -226,6 +232,7 @@ public class ReportController {
         try {
             ensureReportReadyForExport();
 
+            // PDF export uses the same already-generated report, just in a presentation-friendly format.
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Export Summary Report as PDF");
             chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));

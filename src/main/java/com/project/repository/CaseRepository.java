@@ -12,6 +12,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Data access operations for Case entities.
+ * Handles case CRUD, state updates, and report queries.
+ */
 public interface CaseRepository {
     int save(Connection connection, Case c) throws SQLException;
 
@@ -24,6 +28,8 @@ public interface CaseRepository {
     void updatePriorityState(Connection connection, int caseId, PriorityState priorityState) throws SQLException;
 
     void updateState(Connection connection, int caseId, CaseState caseState) throws SQLException;
+
+    void deleteById(Connection connection, int caseId) throws SQLException;
 
     Optional<Case> findById(Connection connection, int caseId) throws SQLException;
 

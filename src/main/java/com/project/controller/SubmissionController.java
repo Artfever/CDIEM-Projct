@@ -20,6 +20,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Transaction workflow for supervisor-review submission.
+ * It checks ownership, confirms verified evidence, then notifies supervisors.
+ */
 public class SubmissionController extends AbstractCaseWorkflowController {
     private final EvidenceRepository evidenceRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
@@ -55,6 +59,7 @@ public class SubmissionController extends AbstractCaseWorkflowController {
                 Evidence evidence = requireEvidence(connection, caseId);
                 validateVerifiedEvidence(evidence);
 
+                // Once the officer hands the case up, the workflow moves from forensic review to supervisor review.
                 chainOfCustodyLog.recordSubmission(connection, existingCase, currentUser);
                 existingCase.moveToState(CaseState.SUPERVISOR_REVIEW);
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());

@@ -4,6 +4,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Utility for hashing passwords using SHA-256.
+ * Used for secure password storage in the database.
+ */
 public final class PasswordUtil {
     private PasswordUtil() {
     }

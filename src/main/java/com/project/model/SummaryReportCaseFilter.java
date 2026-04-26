@@ -1,5 +1,9 @@
 package com.project.model;
 
+/**
+ * Filter options for summary reports.
+ * Determines which cases to include in the report.
+ */
 public enum SummaryReportCaseFilter {
     ALL("All Matching Cases"),
     ACTIVE("Active Cases"),

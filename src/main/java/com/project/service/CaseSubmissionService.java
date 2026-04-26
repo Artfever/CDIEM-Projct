@@ -33,6 +33,7 @@ public class CaseSubmissionService {
         this.caseRepository = caseRepository;
         this.evidenceRepository = evidenceRepository;
 
+        // This service keeps the screen focused on one workflow: submit a verified case to supervisors.
         AuditLogService auditLogService = new AuditLogService(auditRepository);
         ChainOfCustodyLog chainOfCustodyLog = new ChainOfCustodyLog(auditLogService);
         NotificationService notificationService = new NotificationService(notificationRepository);

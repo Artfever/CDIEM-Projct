@@ -14,6 +14,10 @@ import com.project.util.IdGenerator;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Transaction workflow for creating a new case.
+ * It assigns the creator as the officer, calculates SLA details, and records the first audit entry.
+ */
 public class CaseRegistrationController extends AbstractCaseWorkflowController {
     private final AuditLogService auditLogService;
     private final SLAManager slaManager;
@@ -50,6 +54,7 @@ public class CaseRegistrationController extends AbstractCaseWorkflowController {
                         "Only an Investigating Officer can create a case."
                 );
 
+                // New cases begin with an SLA, a priority, and an owner before they are saved.
                 int newSlaHours = slaManager.reEvaluateThreshold(caseRecord.getSeverity());
                 PriorityState newPriorityState = slaManager.transitionPriorityState(caseRecord.getSeverity());
                 caseRecord.setSlaHours(newSlaHours);

@@ -8,9 +8,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+/**
+ * Data access operations for CaseClosureDecision entities.
+ * Handles saving and retrieving supervisor closure decisions.
+ */
 public interface CaseClosureDecisionRepository {
     int save(Connection connection, int caseId, CaseClosureDecisionType decisionType, String reason,
              CaseState previousState, CaseState resultingState, int decidedByUserId) throws SQLException;
+
+    void deleteByCaseId(Connection connection, int caseId) throws SQLException;
 
     Optional<CaseClosureDecision> findLatestByCaseId(Connection connection, int caseId) throws SQLException;
 }

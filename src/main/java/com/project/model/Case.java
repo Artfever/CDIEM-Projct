@@ -2,6 +2,10 @@ package com.project.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a case in the system.
+ * Contains case details, assignment info, severity, priority, and lifecycle timestamps.
+ */
 public class Case {
     private Integer caseId;
     private String title;

@@ -39,6 +39,7 @@ public class CaseClosureService {
         this.evidenceRepository = evidenceRepository;
         this.closureDecisionRepository = closureDecisionRepository;
 
+        // This module has two endings for a case: approve closure or reject it with a reason.
         AuditLogService auditLogService = new AuditLogService(auditRepository);
         ChainOfCustodyLog chainOfCustodyLog = new ChainOfCustodyLog(auditLogService);
         NotificationService notificationService = new NotificationService(notificationRepository);

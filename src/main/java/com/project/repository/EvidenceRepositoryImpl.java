@@ -10,8 +10,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of EvidenceRepository using SQL Server.
+ * Handles evidence storage and integrity verification tracking.
+ */
 public class EvidenceRepositoryImpl implements EvidenceRepository {
     private static final String INSERT_SQL = """
             INSERT INTO Evidence (
@@ -45,10 +51,30 @@ public class EvidenceRepositoryImpl implements EvidenceRepository {
             WHERE CaseID = ?
             ORDER BY UploadedAt DESC, EvidenceID DESC
             """;
+    private static final String FIND_BY_CASE_SQL = """
+            SELECT EvidenceID,
+                   CaseID,
+                   OriginalFileName,
+                   StoredFilePath,
+                   OriginalSHA256,
+                   RecalculatedSHA256,
+                   IntegrityStatus,
+                   UploadedByUserID,
+                   UploadedAt,
+                   LastVerifiedByUserID,
+                   LastVerifiedAt
+            FROM Evidence
+            WHERE CaseID = ?
+            ORDER BY UploadedAt DESC, EvidenceID DESC
+            """;
     private static final String UPDATE_VERIFICATION_SQL = """
             UPDATE Evidence
             SET RecalculatedSHA256 = ?, LastVerifiedByUserID = ?, LastVerifiedAt = ?
             WHERE EvidenceID = ?
+            """;
+    private static final String DELETE_BY_CASE_SQL = """
+            DELETE FROM Evidence
+            WHERE CaseID = ?
             """;
     private static final String UPDATE_STATUS_SQL = """
             UPDATE Evidence
@@ -84,6 +110,29 @@ public class EvidenceRepositoryImpl implements EvidenceRepository {
     }
 
     @Override
+    public List<Evidence> findByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_BY_CASE_SQL)) {
+            statement.setInt(1, caseId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Evidence> evidenceRecords = new ArrayList<>();
+                while (resultSet.next()) {
+                    evidenceRecords.add(mapEvidence(resultSet));
+                }
+                return evidenceRecords;
+            }
+        }
+    }
+
+    @Override
+    public void deleteByCaseId(Connection connection, int caseId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_BY_CASE_SQL)) {
+            statement.setInt(1, caseId);
+            statement.executeUpdate();
+        }
+    }
+
+    @Override
     public Optional<Evidence> findLatestByCaseId(Connection connection, int caseId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(FIND_LATEST_BY_CASE_SQL)) {
             statement.setInt(1, caseId);
@@ -93,20 +142,7 @@ public class EvidenceRepositoryImpl implements EvidenceRepository {
                     return Optional.empty();
                 }
 
-                Evidence evidence = new Evidence(
-                        resultSet.getInt("EvidenceID"),
-                        resultSet.getInt("CaseID"),
-                        resultSet.getString("OriginalFileName"),
-                        resultSet.getString("StoredFilePath"),
-                        resultSet.getString("OriginalSHA256"),
-                        resultSet.getString("RecalculatedSHA256"),
-                        EvidenceStatus.valueOf(resultSet.getString("IntegrityStatus")),
-                        resultSet.getInt("UploadedByUserID"),
-                        toLocalDateTime(resultSet.getTimestamp("UploadedAt")),
-                        (Integer) resultSet.getObject("LastVerifiedByUserID"),
-                        toLocalDateTime(resultSet.getTimestamp("LastVerifiedAt"))
-                );
-                return Optional.of(evidence);
+                return Optional.of(mapEvidence(resultSet));
             }
         }
     }
@@ -147,6 +183,22 @@ public class EvidenceRepositoryImpl implements EvidenceRepository {
 
     private Timestamp asTimestamp(LocalDateTime value) {
         return value == null ? null : Timestamp.valueOf(value);
+    }
+
+    private Evidence mapEvidence(ResultSet resultSet) throws SQLException {
+        return new Evidence(
+                resultSet.getInt("EvidenceID"),
+                resultSet.getInt("CaseID"),
+                resultSet.getString("OriginalFileName"),
+                resultSet.getString("StoredFilePath"),
+                resultSet.getString("OriginalSHA256"),
+                resultSet.getString("RecalculatedSHA256"),
+                EvidenceStatus.valueOf(resultSet.getString("IntegrityStatus")),
+                resultSet.getInt("UploadedByUserID"),
+                toLocalDateTime(resultSet.getTimestamp("UploadedAt")),
+                (Integer) resultSet.getObject("LastVerifiedByUserID"),
+                toLocalDateTime(resultSet.getTimestamp("LastVerifiedAt"))
+        );
     }
 
     private LocalDateTime toLocalDateTime(Timestamp timestamp) {

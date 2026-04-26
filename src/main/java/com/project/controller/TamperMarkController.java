@@ -18,6 +18,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction workflow for marking evidence as tampered.
+ * This final analyst decision freezes the case to stop normal progress.
+ */
 public class TamperMarkController extends AbstractCaseWorkflowController {
     private final EvidenceRepository evidenceRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
@@ -47,6 +51,7 @@ public class TamperMarkController extends AbstractCaseWorkflowController {
                 Evidence evidence = requireEvidence(connection, caseId);
                 validateTamperReady(evidence);
 
+                // A tampered decision affects both the evidence record and the case workflow.
                 LocalDateTime decisionTime = LocalDateTime.now();
                 evidence.markStatus(EvidenceStatus.TAMPERED);
                 evidence.recordVerification(evidence.getRecalculatedSha256(), currentUser.getUserId(), decisionTime);

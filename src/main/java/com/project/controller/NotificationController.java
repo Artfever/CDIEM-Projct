@@ -15,6 +15,10 @@ import javafx.scene.layout.VBox;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Read-only inbox screen for system notifications.
+ * It shows what the current user has been told about cases and workflow events.
+ */
 public class NotificationController {
     private static final String STATUS_NEUTRAL = "status-neutral";
     private static final String STATUS_ERROR = "status-error";
@@ -76,6 +80,7 @@ public class NotificationController {
         }
 
         try {
+            // Notifications are always loaded fresh so the inbox reflects the latest workflow events.
             List<NotificationRecord> notifications = notificationService.getNotificationsForUser(currentUser.getUserId());
             welcomeLabel.setText("Notifications for " + currentUser.getName());
             subtitleLabel.setText("System-delivered alerts tied to your user account.");

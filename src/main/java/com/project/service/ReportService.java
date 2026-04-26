@@ -30,6 +30,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Reporting engine for the summary-report use case.
+ * It builds one filtered snapshot, records that the report was generated, and can export that snapshot.
+ */
 public class ReportService {
     private static final DateTimeFormatter EXPORT_TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final String PDF_HEADER = "%PDF-1.4\n";
@@ -63,6 +67,7 @@ public class ReportService {
                     throw new IllegalStateException("Only the Supervisory Authority can generate summary reports.");
                 }
 
+                // The report and its audit entry are created together so the system remembers who generated it.
                 LocalDateTime generatedAt = LocalDateTime.now();
                 List<SummaryReportCaseRecord> matchingCases =
                         caseRepository.findCasesForSummaryReport(connection, validatedRequest);
@@ -124,6 +129,7 @@ public class ReportService {
 
     private SummaryReportResult buildResult(SummaryReportRequest request, List<SummaryReportCaseRecord> matchingCases,
                                             User currentUser, LocalDateTime generatedAt) {
+        // The raw matching cases are converted into dashboard-style counts plus the detailed case list.
         EnumMap<CaseState, Long> statusCounts = new EnumMap<>(CaseState.class);
         for (CaseState caseState : CaseState.values()) {
             statusCounts.put(caseState, 0L);

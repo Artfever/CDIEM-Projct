@@ -11,6 +11,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+/**
+ * Handles user registration (sign up).
+ * Validates input, checks for duplicates, and creates new users.
+ */
 public class SignUpService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
@@ -57,6 +61,7 @@ public class SignUpService {
         String passwordHash = PasswordUtil.sha256(cleanedPassword);
 
         try (Connection connection = DBConnection.getConnection()) {
+            // Sign-up first blocks duplicates, then creates a brand-new user record with a hashed password.
             if (userRepository.usernameExists(connection, cleanedUsername)) {
                 throw new SignUpException(SignUpException.Reason.USERNAME_IN_USE,
                         "Username is already in use. Please choose another.");
