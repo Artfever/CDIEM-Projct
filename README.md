@@ -140,6 +140,33 @@ mvn clean package
 
 The Maven artifact is currently produced under `target` with the artifact name `JavaFXSQLApp`.
 
+### Build a Windows Executable
+Use the packaging script instead of `javafx:jlink`:
+
+```powershell
+.\scripts\package-windows.ps1
+```
+
+This produces a runnable Windows app image under `dist`, including a launcher `.exe`.
+
+The launcher will be at:
+
+```text
+dist\CDIEM\CDIEM.exe
+```
+
+If you want a Windows installer instead of the app image:
+
+```powershell
+.\scripts\package-windows.ps1 -PackageType exe
+```
+
+Installer generation on Windows requires the WiX Toolset to be installed and available on `PATH`.
+
+Why not `mvn javafx:jlink`? The project depends on `mssql-jdbc`, which is an automatic module rather than a fully linked JPMS module, so `jlink` cannot package it. The PowerShell script packages the app in non-modular mode with `jpackage`, bundles the runtime dependencies, copies the `config` directory, creates an empty `storage/evidence` directory, and sets the launcher working directory to the packaged app folder so the existing relative paths continue to work.
+
+The Windows package uses a small bootstrap main class for launching JavaFX from a classpath-based `jpackage` image.
+
 ## Security and Traceability Notes
 - User passwords are stored as SHA-256 hashes.
 - Evidence integrity is verified by recalculating SHA-256 hashes from stored files.
