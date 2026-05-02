@@ -3,6 +3,9 @@ package com.project.service;
 import com.project.model.PriorityState;
 import com.project.model.SeverityLevel;
 
+/**
+ * Converts severity levels into SLA deadlines and priority states.
+ */
 public class SLAManager {
     private static final int LOW_SLA_HOURS = 120;
     private static final int MEDIUM_SLA_HOURS = 72;

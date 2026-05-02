@@ -17,6 +17,9 @@ import com.project.util.DBConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Coordinates the final officer step before supervisor review.
+ */
 public class CaseSubmissionService {
     private final CaseRepository caseRepository;
     private final EvidenceRepository evidenceRepository;

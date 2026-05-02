@@ -3,6 +3,9 @@ package com.project.service;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Thin service facade for creating audit entries from UI workflows.
+ */
 public class LogService {
     private final AuditLogService auditLogService;
 

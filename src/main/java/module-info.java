@@ -1,3 +1,7 @@
+/**
+ * CDIEM desktop application module.
+ * Exposes the JavaFX application and opens controllers so FXML can inject UI fields.
+ */
 module com.project.cdiem {
     requires javafx.controls;
     requires javafx.fxml;

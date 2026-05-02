@@ -20,6 +20,9 @@ import com.project.util.DBConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Coordinates supervisor decisions for closing or rejecting a case.
+ */
 public class CaseClosureService {
     private final CaseRepository caseRepository;
     private final EvidenceRepository evidenceRepository;

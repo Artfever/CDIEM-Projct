@@ -11,12 +11,16 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Immutable report snapshot containing metrics, distributions, and matching cases.
+ */
 public record SummaryReportResult(SummaryReportRequest request, String generatedByName, int generatedByUserId,
                                   LocalDateTime generatedAt, List<SummaryReportCaseRecord> matchingCases,
                                   Map<CaseState, Long> statusCounts, Map<SeverityLevel, Long> severityCounts,
                                   long matchedCaseCount, long slaCompliantCount, long slaBreachedCount,
                                   long frozenCaseCount, long tamperedCaseCount) {
     public SummaryReportResult {
+        // Defensive copies keep exported reports stable even if the caller later changes source collections.
         matchingCases = List.copyOf(matchingCases);
         statusCounts = Collections.unmodifiableMap(new EnumMap<>(statusCounts));
         severityCounts = Collections.unmodifiableMap(new EnumMap<>(severityCounts));

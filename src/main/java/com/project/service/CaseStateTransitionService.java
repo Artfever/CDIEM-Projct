@@ -18,6 +18,9 @@ import com.project.util.DBConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Coordinates workflow transitions that pause or resume a case.
+ */
 public class CaseStateTransitionService {
     private final CaseRepository caseRepository;
     private final EvidenceRepository evidenceRepository;

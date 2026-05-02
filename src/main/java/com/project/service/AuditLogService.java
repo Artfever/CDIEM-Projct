@@ -9,7 +9,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service wrapper for writing and reading audit records.
+ * Keeping this logic central makes workflow actions easier to trace consistently.
+ */
 public final class AuditLogService {
+    // Shared instance is used by simple workflow helpers that do not need custom repository injection.
     private static final AuditLogService INSTANCE = new AuditLogService(new AuditRepositoryImpl());
 
     private final AuditRepository auditRepository;

@@ -10,6 +10,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Creates user notifications for case ownership and workflow events.
+ */
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 

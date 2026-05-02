@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+/**
+ * Copies uploaded evidence into the application's managed storage folder.
+ */
 public class SecureFileStorage {
     private static final Path STORAGE_ROOT = Path.of("storage", "evidence");
     private static final DateTimeFormatter FILE_STAMP = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -26,6 +29,7 @@ public class SecureFileStorage {
             Files.createDirectories(caseDirectory);
 
             String originalName = sourceFile.getFileName().toString();
+            // Timestamp and UUID keep stored evidence filenames unique while preserving the original name.
             String storedFileName = FILE_STAMP.format(LocalDateTime.now())
                     + "-"
                     + UUID.randomUUID().toString().replace("-", "")
@@ -44,6 +48,7 @@ public class SecureFileStorage {
     }
 
     public boolean deleteStoredFile(Path storedFile) {
+        // Deletion is best-effort because missing files should not block database cleanup.
         if (storedFile == null) {
             return true;
         }

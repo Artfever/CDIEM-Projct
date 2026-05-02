@@ -9,6 +9,9 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Generates and compares SHA-256 hashes for evidence integrity checks.
+ */
 public class HashService {
     private static final int BUFFER_SIZE = 8192;
 
@@ -18,6 +21,7 @@ public class HashService {
             byte[] buffer = new byte[BUFFER_SIZE];
             int bytesRead;
 
+            // Stream the file in chunks so large evidence files do not have to be loaded fully into memory.
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 digest.update(buffer, 0, bytesRead);
             }
@@ -39,6 +43,7 @@ public class HashService {
     }
 
     public boolean compareHashes(String storedHash, String recalculatedHash) {
+        // Hash comparison is case-insensitive because hex strings may be stored with different casing.
         return storedHash != null
                 && recalculatedHash != null
                 && storedHash.equalsIgnoreCase(recalculatedHash);

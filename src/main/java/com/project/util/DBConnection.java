@@ -11,7 +11,7 @@ import java.util.Properties;
 /**
  * Manages database connections for the application.
  * Reads credentials from config/db.properties or environment variables.
- * Priority: System properties → Environment variables → config file
+ * Priority: System properties -> environment variables -> config file.
  */
 public final class DBConnection {
     private static final Path CONFIG_PATH = Path.of("config", "db.properties");

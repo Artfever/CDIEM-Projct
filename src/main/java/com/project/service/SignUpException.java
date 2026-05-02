@@ -1,5 +1,8 @@
 package com.project.service;
 
+/**
+ * Domain-specific exception that lets the signup UI show precise validation feedback.
+ */
 public class SignUpException extends RuntimeException {
     public enum Reason {
         REQUIRED_FIELDS,

@@ -12,6 +12,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Builds the audit messages that form the chain-of-custody log.
+ * Each public method records one important workflow event in readable form.
+ */
 public final class ChainOfCustodyLog {
     private final AuditLogService auditLogService;
 
@@ -166,6 +170,7 @@ public final class ChainOfCustodyLog {
     }
 
     public Optional<Integer> findLatestFreezingAnalystId(Connection connection, int caseId) throws SQLException {
+        // Reopen notifications need the last analyst who froze or marked evidence as tampered.
         return auditLogService.findMostRecentActorByActionPrefixes(
                 connection,
                 caseId,
@@ -182,6 +187,7 @@ public final class ChainOfCustodyLog {
     }
 
     private String abbreviateHash(String hash) {
+        // Audit messages show enough of the hash to compare entries without flooding the log UI.
         if (hash == null || hash.isBlank()) {
             return "n/a";
         }
