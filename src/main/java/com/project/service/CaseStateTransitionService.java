@@ -41,7 +41,13 @@ public class CaseStateTransitionService {
         NotificationService notificationService = new NotificationService(notificationRepository);
 
         this.caseFreezeController = new CaseFreezeController(caseRepository, userRepository, chainOfCustodyLog);
-        this.reopenController = new ReopenController(caseRepository, userRepository, chainOfCustodyLog, notificationService);
+        this.reopenController = new ReopenController(
+                caseRepository,
+                evidenceRepository,
+                userRepository,
+                chainOfCustodyLog,
+                notificationService
+        );
     }
 
     public CaseFreezeResult freezeCase(int caseId, int userId) {

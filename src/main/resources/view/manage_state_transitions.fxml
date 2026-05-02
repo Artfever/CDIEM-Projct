@@ -125,7 +125,7 @@
                                                     <VBox spacing="4.0">
                                                         <children>
                                                             <Label text="Reopen Case" styleClass="panel-title" />
-                                                            <Label text="Record the supervisory rationale, reopen the frozen case, and return it to Supervisor Review."
+                                                            <Label text="Record the supervisory rationale, reopen the frozen case, and reset tampered evidence to Uploaded when needed."
                                                                    styleClass="panel-subtitle"
                                                                    wrapText="true" />
                                                         </children>

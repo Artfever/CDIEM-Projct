@@ -1,10 +1,14 @@
 package com.project.controller;
 
 import com.project.model.Case;
+import com.project.model.Evidence;
+import com.project.model.EvidenceStatus;
 import com.project.model.User;
 import com.project.model.UserRole;
 import com.project.repository.CaseRepository;
 import com.project.repository.CaseRepositoryImpl;
+import com.project.repository.EvidenceRepository;
+import com.project.repository.EvidenceRepositoryImpl;
 import com.project.repository.UserRepository;
 import com.project.repository.UserRepositoryImpl;
 import com.project.service.CaseReopenNotificationResult;
@@ -22,16 +26,25 @@ import java.sql.SQLException;
 public class ReopenController extends AbstractCaseWorkflowController {
     private static final int MAX_REASON_LENGTH = 320;
 
+    private final EvidenceRepository evidenceRepository;
     private final ChainOfCustodyLog chainOfCustodyLog;
     private final NotificationService notificationService;
 
     public ReopenController() {
-        this(new CaseRepositoryImpl(), new UserRepositoryImpl(), new ChainOfCustodyLog(), new NotificationService());
+        this(new CaseRepositoryImpl(), new EvidenceRepositoryImpl(), new UserRepositoryImpl(),
+                new ChainOfCustodyLog(), new NotificationService());
     }
 
     public ReopenController(CaseRepository caseRepository, UserRepository userRepository,
                             ChainOfCustodyLog chainOfCustodyLog, NotificationService notificationService) {
+        this(caseRepository, new EvidenceRepositoryImpl(), userRepository, chainOfCustodyLog, notificationService);
+    }
+
+    public ReopenController(CaseRepository caseRepository, EvidenceRepository evidenceRepository,
+                            UserRepository userRepository, ChainOfCustodyLog chainOfCustodyLog,
+                            NotificationService notificationService) {
         super(caseRepository, userRepository);
+        this.evidenceRepository = evidenceRepository;
         this.chainOfCustodyLog = chainOfCustodyLog;
         this.notificationService = notificationService;
     }
@@ -65,6 +78,8 @@ public class ReopenController extends AbstractCaseWorkflowController {
 
                 // Reopening reverses the freeze and tells both the officer and the last analyst what changed.
                 chainOfCustodyLog.recordReopen(connection, existingCase, currentUser, cleanedReason);
+                boolean tamperedEvidenceResetToDefault =
+                        resetTamperedEvidenceToDefault(connection, existingCase, currentUser);
                 existingCase.reopenToSupervisorReview();
                 caseRepository.updateState(connection, caseId, existingCase.getStatus());
 
@@ -81,6 +96,7 @@ public class ReopenController extends AbstractCaseWorkflowController {
                 return new CaseReopenResult(
                         existingCase.getStatus(),
                         cleanedReason,
+                        tamperedEvidenceResetToDefault,
                         notificationResult.investigatingOfficerNotified(),
                         notificationResult.forensicAnalystNotified(),
                         forensicAnalyst == null ? null : forensicAnalyst.getName()
@@ -92,6 +108,25 @@ public class ReopenController extends AbstractCaseWorkflowController {
         } catch (SQLException e) {
             throw new IllegalStateException("Could not access the database.", e);
         }
+    }
+
+    private boolean resetTamperedEvidenceToDefault(Connection connection, Case existingCase, User currentUser)
+            throws SQLException {
+        Evidence evidence = evidenceRepository.findLatestByCaseId(connection, existingCase.getCaseId()).orElse(null);
+        if (evidence == null || evidence.getStatus() != EvidenceStatus.TAMPERED) {
+            return false;
+        }
+
+        evidenceRepository.updateStatus(
+                connection,
+                evidence.getEvidenceId(),
+                EvidenceStatus.UPLOADED,
+                null,
+                null,
+                null
+        );
+        chainOfCustodyLog.recordTamperedEvidenceReset(connection, existingCase, evidence, currentUser);
+        return true;
     }
 
     private String validateReason(String reason) {

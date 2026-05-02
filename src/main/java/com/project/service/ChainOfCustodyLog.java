@@ -119,6 +119,17 @@ public final class ChainOfCustodyLog {
         );
     }
 
+    public void recordTamperedEvidenceReset(Connection connection, Case existingCase, Evidence evidence,
+                                            User supervisor) throws SQLException {
+        auditLogService.recordAudit(
+                connection,
+                existingCase.getCaseId(),
+                "EVIDENCE_TAMPER_STATUS_RESET_TO_UPLOADED file " + evidence.getOriginalFileName()
+                        + " during case reopen by " + supervisor.getRole().getDisplayName(),
+                supervisor.getUserId()
+        );
+    }
+
     public void recordClosureRejection(Connection connection, Case existingCase, User supervisor, String reason)
             throws SQLException {
         auditLogService.recordAudit(

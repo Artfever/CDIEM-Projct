@@ -161,7 +161,7 @@ public class CaseStateTransitionController {
             ensureRole(UserRole.SUPERVISOR, "Only the Supervisory Authority can reopen a case.");
 
             int caseId = parseRequiredInteger(caseIdField.getText(), "Case ID");
-            // Reopen puts a frozen case back into supervised handling and alerts the people involved.
+            // Reopen puts a frozen case back into supervised handling and clears a tampered evidence lock if present.
             CaseReopenResult result = transitionService.reopenCase(caseId, reopenReasonArea.getText(), currentUser.getUserId());
             currentSnapshot = transitionService.getTransitionSnapshot(caseId);
             renderSnapshot(currentSnapshot);
@@ -188,7 +188,7 @@ public class CaseStateTransitionController {
                 : "Reopen frozen cases, send workflow notifications, and return them to Supervisor Review.");
         accessSummaryLabel.setText(analystSignedIn
                 ? "Analysts can freeze cases in evidence or review workflow. Tampered evidence can still freeze a case automatically from the Manage Evidence module."
-                : "Supervisory Authority users can reopen only frozen cases. Reopen records the stated reason, restores the case to Supervisor Review, and notifies the assigned officer plus the last analyst who froze or tampered the case.");
+                : "Supervisory Authority users can reopen only frozen cases. Reopen records the stated reason, restores the case to Supervisor Review, resets tampered evidence to Uploaded when needed, and notifies the assigned officer plus the last analyst who froze or tampered the case.");
 
         setNodeVisibility(freezePanel, analystSignedIn);
         setNodeVisibility(reopenPanel, supervisorSignedIn);
@@ -275,12 +275,16 @@ public class CaseStateTransitionController {
     }
 
     private String buildReopenStatus(CaseReopenResult result) {
+        String resetMessage = result.tamperedEvidenceResetToDefault()
+                ? ". Tampered evidence was reset to Uploaded"
+                : "";
+
         if (!result.forensicAnalystNotified()) {
-            return "Case reopened to " + formatCaseState(result.caseState())
+            return "Case reopened to " + formatCaseState(result.caseState()) + resetMessage
                     + ". Assigned investigating officer notified, but no analyst recipient was resolved from the custody log.";
         }
 
-        return "Case reopened to " + formatCaseState(result.caseState())
+        return "Case reopened to " + formatCaseState(result.caseState()) + resetMessage
                 + ". Assigned investigating officer and " + result.forensicAnalystName()
                 + " were notified.";
     }
