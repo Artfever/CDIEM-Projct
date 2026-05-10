@@ -44,16 +44,6 @@
                     </children>
                 </HBox>
 
-                <VBox spacing="5.0" styleClass="credential-card">
-                    <children>
-                        <Label text="Seeded access" styleClass="credential-title" />
-                        <Label text="Use any seeded username or email with password `CDIEM@123` after applying the new migration." styleClass="credential-text" wrapText="true" />
-                    </children>
-                    <padding>
-                        <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-                    </padding>
-                </VBox>
-
                 <Label fx:id="statusLabel" text="Ready." wrapText="true" styleClass="status-banner status-neutral" />
             </children>
             <padding>

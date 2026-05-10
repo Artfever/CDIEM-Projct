@@ -7,7 +7,7 @@ param(
 
     [string]$AppVersion = "1.0.0",
 
-    [string]$JdkHome = $env:JAVA_HOME,
+    [string]$JdkHome = "",
 
     [string]$OutputDir = "dist"
 )
@@ -28,8 +28,44 @@ function Fail([string]$Message) {
     throw $Message
 }
 
+function Get-CommandPath([string]$CommandName) {
+    $command = Get-Command $CommandName -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $command) {
+        return $null
+    }
+
+    if ($command.Source) {
+        return $command.Source
+    }
+
+    return $command.Path
+}
+
+function Resolve-JdkHome([string]$RequestedJdkHome) {
+    if ($RequestedJdkHome) {
+        return $RequestedJdkHome
+    }
+
+    if ($env:JAVA_HOME) {
+        return $env:JAVA_HOME
+    }
+
+    $jpackageOnPath = Get-CommandPath "jpackage.exe"
+    if ($jpackageOnPath) {
+        return Split-Path -Parent (Split-Path -Parent $jpackageOnPath)
+    }
+
+    return $null
+}
+
+$JdkHome = Resolve-JdkHome $JdkHome
+
 if (-not $JdkHome) {
-    Fail "JAVA_HOME is not set. Point it to a JDK 21 installation before running this script."
+    Fail "JAVA_HOME is not set and jpackage.exe was not found on PATH. Install JDK 21 or newer, add it to PATH, or rerun with -JdkHome '<path-to-jdk>'."
+}
+
+if (Test-Path $JdkHome) {
+    $JdkHome = (Resolve-Path $JdkHome).Path
 }
 
 $javaExe = Join-Path $JdkHome "bin\java.exe"
@@ -43,10 +79,11 @@ if (-not (Test-Path $jpackageExe)) {
     Fail "jpackage.exe was not found under '$JdkHome\bin'. Use JDK 21 or newer."
 }
 
-$javaVersionLine = (& $javaExe --version | Select-Object -First 1)
+$javaVersionOutput = & $javaExe --version
 if ($LASTEXITCODE -ne 0) {
     Fail "Failed to read the Java version from '$javaExe'."
 }
+$javaVersionLine = $javaVersionOutput | Select-Object -First 1
 
 if ($javaVersionLine -match '"(?<major>\d+)') {
     $javaMajor = [int]$Matches.major

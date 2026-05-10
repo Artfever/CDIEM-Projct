@@ -147,6 +147,18 @@ Use the packaging script instead of `javafx:jlink`:
 .\scripts\package-windows.ps1
 ```
 
+If PowerShell blocks local scripts on your machine, use the wrapper instead:
+
+```powershell
+.\scripts\package-windows.cmd
+```
+
+You can also run the PowerShell script with a process-only bypass:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-windows.ps1
+```
+
 This produces a runnable Windows app image under `dist`, including a launcher `.exe`.
 
 The launcher will be at:
@@ -162,6 +174,12 @@ If you want a Windows installer instead of the app image:
 ```
 
 Installer generation on Windows requires the WiX Toolset to be installed and available on `PATH`.
+The script uses `JAVA_HOME` when it is set; otherwise it tries to detect a JDK from `jpackage.exe` on `PATH`.
+If needed, pass the JDK location explicitly, for example:
+
+```powershell
+.\scripts\package-windows.ps1 -JdkHome "C:\Program Files\Java\jdk-21.0.11"
+```
 
 Why not `mvn javafx:jlink`? The project depends on `mssql-jdbc`, which is an automatic module rather than a fully linked JPMS module, so `jlink` cannot package it. The PowerShell script packages the app in non-modular mode with `jpackage`, bundles the runtime dependencies, copies the `config` directory, creates an empty `storage/evidence` directory, and sets the launcher working directory to the packaged app folder so the existing relative paths continue to work.
 
