@@ -8,3 +8,4 @@ config/db.properties
 .env
 *.log
 storage/
+desktop.ini
