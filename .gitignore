@@ -9,3 +9,4 @@ config/db.properties
 *.log
 storage/
 desktop.ini
+.idea
